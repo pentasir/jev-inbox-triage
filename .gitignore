@@ -1,0 +1,22 @@
+.DS_Store
+__pycache__/
+node_modules/
+
+# HyperFrames working files
+.thumbnails/
+.hyperframes/
+snapshots/
+videos/_backups/
+videos/inbox-triage-15s/CLAUDE.md
+videos/inbox-triage-15s/AGENTS.md
+
+# v1 recorder scratch
+animation/stills/
+animation/frames/
+
+# self-test output (pipeline check, not model output)
+results/*selftest*
+
+# secrets never live here, but just in case
+.env
+*.key

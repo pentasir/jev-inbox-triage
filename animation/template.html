@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inbox Triage Animation</title>
+<style>
+  :root {
+    --bg: #0a0c11;
+    --panel: #12151d;
+    --panel-2: #181c26;
+    --line: #232837;
+    --ink: #eef0f5;
+    --muted: #8b91a1;
+    --now: #ff6b5e;
+    --queue: #ffb648;
+    --auto: #3fd68a;
+    --archive: #7d8496;
+    --jev-a: #8b7bff;
+    --jev-b: #45d4ff;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; background: var(--bg); overflow: hidden; }
+  body { display: grid; place-items: center; font-family: var(--sans); color: var(--ink); }
+  #stage {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    background:
+      radial-gradient(900px 500px at 50% 36%, rgba(139,123,255,.10), transparent 70%),
+      linear-gradient(var(--bg), var(--bg));
+    transform-origin: 0 0;
+  }
+  #stage::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 54px 54px;
+    mask-image: radial-gradient(ellipse at 50% 40%, #000 30%, transparent 80%);
+  }
+  .abs { position: absolute; left: 0; top: 0; will-change: transform, opacity; }
+
+  #head { left: 72px; top: 64px; width: 936px; }
+  .kicker { font: 600 18px/1 var(--mono); letter-spacing: .14em; color: var(--jev-b); text-transform: uppercase; }
+  h1 { font-size: 54px; line-height: 1.08; font-weight: 700; letter-spacing: -.02em; margin-top: 18px; }
+  h1 span { color: var(--muted); font-weight: 600; }
+
+  .back {
+    width: 640px; height: 64px; border-radius: 14px; background: var(--panel);
+    border: 1px solid var(--line); padding: 18px 22px; display: flex; gap: 14px; align-items: center;
+  }
+  .back i { display: block; height: 10px; border-radius: 5px; background: var(--line); }
+  #pileLabel { width: 640px; text-align: right; font: 500 18px/1 var(--mono); color: var(--muted); }
+
+  #prism { width: 92px; height: 92px; }
+  #prism .gem {
+    position: absolute; inset: 14px; border-radius: 16px; transform: rotate(45deg);
+    background: conic-gradient(from 0deg, var(--jev-a), var(--jev-b), #b9f3ff, var(--jev-a));
+  }
+  #prism .glow {
+    position: absolute; inset: -40px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(69,212,255,.55), rgba(139,123,255,.25) 40%, transparent 70%);
+  }
+  #prismLabel { font: 600 20px/1 var(--mono); color: var(--ink); letter-spacing: .06em; }
+  #prismLabel b { color: var(--jev-b); font-weight: 600; }
+
+  .card {
+    width: 880px; min-height: 236px; border-radius: 22px; padding: 28px 32px 26px;
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    transform-origin: 50% 50%;
+  }
+  .card .from { font: 600 18px/1 var(--mono); color: var(--muted); letter-spacing: .04em; }
+  .card .text { font-size: 30px; line-height: 1.32; margin-top: 14px; font-weight: 500; }
+  .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; min-height: 40px; }
+  .tag {
+    font: 600 18px/1 var(--mono); padding: 10px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.06); color: var(--ink); border: 1px solid var(--line);
+  }
+  .tag.risk { background: rgba(255,107,94,.14); border-color: rgba(255,107,94,.45); color: #ffb3ab; }
+  .tag.pitch { background: rgba(125,132,150,.18); border-color: rgba(125,132,150,.5); color: #c9cdd8; }
+  .tag.refund { background: rgba(255,182,72,.13); border-color: rgba(255,182,72,.45); color: #ffd79c; }
+  .verdict { font: 700 22px/1 var(--sans); margin-top: 18px; display: flex; gap: 12px; align-items: center; }
+  .verdict .why { font: 500 19px/1.2 var(--sans); color: var(--muted); }
+
+  .lane { width: 228px; }
+  .lane .name { font: 700 22px/1 var(--sans); display: flex; align-items: center; gap: 10px; }
+  .lane .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .lane .count { font: 700 64px/1 var(--sans); margin-top: 14px; letter-spacing: -.03em; }
+  .lane .rule { height: 3px; border-radius: 2px; margin-top: 16px; opacity: .8; }
+
+  .chip {
+    width: 228px; height: 28px; border-radius: 8px; padding: 0 12px;
+    display: flex; align-items: center; gap: 9px; font: 600 15px/1 var(--mono);
+    background: var(--panel); border: 1px solid var(--line); color: var(--ink);
+  }
+  .chip .d { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .chip.miss { border-style: dashed; color: var(--muted); }
+
+  #summary { left: 72px; top: 400px; width: 936px; }
+  #summary .big { font-size: 112px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+  #summary .big span { color: var(--muted); font-weight: 700; }
+  #summary .lede { font-size: 30px; color: var(--muted); margin-top: 10px; }
+  #summary .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+  #summary .cell { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; }
+  #summary .cell b { display: block; font-size: 44px; letter-spacing: -.02em; }
+  #summary .cell span { display: block; margin-top: 8px; font-size: 19px; color: var(--muted); line-height: 1.3; }
+
+  #foot { left: 72px; top: 1290px; width: 936px; font: 500 16px/1.3 var(--mono); color: #5c6274; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="head" class="abs">
+    <div class="kicker">Inbox triage · TypeSafe Jev</div>
+    <h1>20 customer emails.<br><span>Which ones need a human?</span></h1>
+  </div>
+  <div id="pile"></div>
+  <div id="pileLabel" class="abs"></div>
+  <div id="prism" class="abs"><div class="glow"></div><div class="gem"></div></div>
+  <div id="prismLabel" class="abs"></div>
+  <div id="lanes"></div>
+  <div id="cards"></div>
+  <div id="chips"></div>
+  <div id="summary" class="abs"></div>
+  <div id="foot" class="abs"><span>Real model output · test inbox, not a live store</span><span id="footModel"></span></div>
+</div>
+
+<script>
+const DATA = /*DATA*/null;
+const { items, stats, lanes: LANE_NAMES } = DATA;
+const LANE_KEYS = ["human_now", "human_queue", "auto", "archive"];
+const LANE_COLOR = { human_now: "var(--now)", human_queue: "var(--queue)", auto: "var(--auto)", archive: "var(--archive)" };
+
+// ---------- layout (stage px) ----------
+const PILE = { x: 540, y: 318 };
+const PRISM = { x: 540, y: 436 };
+const ACTIVE = { x: 540, y: 660 };
+const LANE_W = 228, LANE_GAP = 16;
+const LANE_X0 = 540 - (4 * LANE_W + 3 * LANE_GAP) / 2;
+const laneLeft = k => LANE_X0 + LANE_KEYS.indexOf(k) * (LANE_W + LANE_GAP);
+const LANE_Y = 856, CHIP_Y0 = 988, CHIP_STEP = 34;
+
+// ---------- schedule ----------
+const INTRO = 1.6;
+let t = INTRO;
+items.forEach((it, i) => {
+  const hero = i < 4;
+  it.hero = hero;
+  it.s = t;                                 // leaves the pile
+  it.a = it.s + (hero ? 0.55 : 0.28);       // arrives at Jev
+  it.b = it.a + (hero ? 2.3 : 0.5);         // judged, starts dropping
+  it.c = it.b + (hero ? 0.65 : 0.42);       // lands in lane
+  t = it.b;
+});
+const laneIndex = {};
+items.forEach(it => { laneIndex[it.lane] = laneIndex[it.lane] || 0; it.slot = laneIndex[it.lane]++; });
+const END = items[items.length - 1].c;
+const OUTRO = END + 0.5;
+const TOTAL = OUTRO + 5.5;
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const lerp = (a, b, p) => a + (b - a) * p;
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const place = (e, x, y, s = 1, o = 1) => { e.style.transform = `translate(${x}px, ${y}px) scale(${s})`; e.style.opacity = o; };
+
+// ---------- build DOM ----------
+const stage = document.getElementById("stage");
+document.getElementById("footModel").textContent = stats.model;
+
+const backs = [0, 1, 2, 3, 4].map(i => {
+  const b = el("div", "abs back", `<i style="width:90px"></i><i style="width:${300 - i * 30}px"></i>`);
+  document.getElementById("pile").appendChild(b);
+  return b;
+});
+const pileLabel = document.getElementById("pileLabel");
+const prism = document.getElementById("prism");
+const prismGlow = prism.querySelector(".glow");
+const prismGem = prism.querySelector(".gem");
+const prismLabel = document.getElementById("prismLabel");
+
+const laneEls = {};
+LANE_KEYS.forEach(k => {
+  const l = el("div", "abs lane",
+    `<div class="name"><span class="dot" style="background:${LANE_COLOR[k]}"></span>${LANE_NAMES[k]}</div>
+     <div class="count">0</div><div class="rule" style="background:${LANE_COLOR[k]}"></div>`);
+  document.getElementById("lanes").appendChild(l);
+  laneEls[k] = { root: l, count: l.querySelector(".count") };
+});
+
+items.forEach(it => {
+  const c = el("div", "abs card");
+  c.innerHTML = `<div class="from">FROM: ${esc(it.from).toUpperCase()}</div><div class="text">${esc(it.text)}</div>`;
+  const tags = el("div", "tags");
+  it.tagEls = it.tags.map(tg => { const s = el("span", `tag ${tg.k}`, esc(tg.t)); tags.appendChild(s); return s; });
+  c.appendChild(tags);
+  it.verdictEl = el("div", "verdict",
+    `<span style="color:${LANE_COLOR[it.lane]}">→ ${LANE_NAMES[it.lane]}</span><span class="why">${esc(it.reason)}</span>`);
+  c.appendChild(it.verdictEl);
+  document.getElementById("cards").appendChild(c);
+  it.card = c;
+
+  const chip = el("div", `abs chip${it.ok ? "" : " miss"}`,
+    `<span class="d" style="background:${LANE_COLOR[it.lane]}"></span>${esc(it.from)}${it.ok ? "" : " · unsure"}`);
+  document.getElementById("chips").appendChild(chip);
+  it.chip = chip;
+});
+
+const summary = document.getElementById("summary");
+summary.innerHTML = `
+  <div class="big">${stats.correct}<span>/${stats.n}</span></div>
+  <div class="lede">sent to the right place. The one it wasn't sure about went to a person.</div>
+  <div class="grid">
+    <div class="cell"><b>${stats.risky_automated}</b><span>risky emails sent to automation</span></div>
+    <div class="cell"><b>${stats.median_ms} ms</b><span>median time to judge an email</span></div>
+    <div class="cell"><b>~${stats.monthly_cents}¢</b><span>a month at ${stats.monthly_emails} emails</span></div>
+  </div>`;
+
+// ---------- render: a pure function of time ----------
+function renderAt(t) {
+  // header + intro
+  const intro = easeOut(prog(t, 0, 0.8));
+  place(document.getElementById("head"), 0, lerp(16, 0, intro), 1, intro);
+
+  // pile
+  const waiting = items.filter(it => t < it.s).length;
+  backs.forEach((b, i) => {
+    const shown = i < Math.min(waiting, 5);
+    const pin = easeOut(prog(t, 0.3 + i * 0.08, 0.7 + i * 0.08));
+    place(b, PILE.x - 320 + i * 0, PILE.y - 32 - i * 9, 1 - i * 0.03, shown ? pin * (1 - i * 0.16) : 0);
+    b.style.zIndex = 10 - i;
+  });
+  pileLabel.textContent = waiting ? `INBOX · ${waiting} waiting` : "INBOX · empty";
+  const outroP = ease(prog(t, OUTRO, OUTRO + 0.7));
+  place(pileLabel, PILE.x - 320, PILE.y - 70, 1, intro * (1 - outroP) * (waiting ? 1 : 0.6));
+
+  // prism
+  const judging = items.find(it => t >= it.a - 0.1 && t < it.b);
+  const pulse = judging ? 0.75 + 0.25 * Math.sin((t - judging.a) * 9) : 0.35;
+  place(prism, PRISM.x - 46 - 300, PRISM.y - 46, 1, intro * (1 - outroP));
+  prismGem.style.transform = `rotate(${45 + t * 30}deg)`;
+  prismGlow.style.opacity = pulse;
+  const ms = judging ? judging.ms : null;
+  prismLabel.innerHTML = `<b>JEV</b> ${ms ? `· judged in ${ms} ms` : "· waiting"}`;
+  place(prismLabel, PRISM.x - 300 + 70, PRISM.y - 10, 1, intro * (1 - outroP));
+
+  // cards
+  items.forEach(it => {
+    const c = it.card;
+    if (t < it.s || t > it.c) { c.style.opacity = 0; return; }
+    const h = c.offsetHeight;
+    const laneX = laneLeft(it.lane) + LANE_W / 2, laneY = CHIP_Y0 + it.slot * CHIP_STEP + 14;
+    let x, y, s, o;
+    if (t < it.a) {
+      const p = ease(prog(t, it.s, it.a));
+      x = lerp(PILE.x, ACTIVE.x, p); y = lerp(PILE.y, ACTIVE.y, p); s = lerp(0.72, 1, p); o = clamp(p * 3);
+    } else if (t < it.b) {
+      x = ACTIVE.x; y = ACTIVE.y; s = 1; o = 1;
+    } else {
+      const p = ease(prog(t, it.b, it.c));
+      x = lerp(ACTIVE.x, laneX, p); y = lerp(ACTIVE.y, laneY, p); s = lerp(1, 0.26, p); o = 1 - clamp((p - 0.6) / 0.4);
+    }
+    place(c, x - 440, y - h / 2, s, o);
+    c.style.zIndex = 100;
+
+    // tags + verdict reveal while at Jev
+    const step = it.hero ? 0.32 : 0.05;
+    const t0 = it.a + (it.hero ? 0.25 : 0.04);
+    it.tagEls.forEach((tg, j) => {
+      const p = easeOut(prog(t, t0 + j * step, t0 + j * step + 0.2));
+      tg.style.opacity = p; tg.style.transform = `translateY(${(1 - p) * 8}px)`;
+    });
+    const vt = t0 + it.tagEls.length * step + (it.hero ? 0.25 : 0.08);
+    const vp = easeOut(prog(t, vt, vt + 0.22));
+    it.verdictEl.style.opacity = vp;
+    it.verdictEl.style.transform = `translateX(${(1 - vp) * -10}px)`;
+  });
+
+  // lanes + chips
+  LANE_KEYS.forEach(k => {
+    place(laneEls[k].root, laneLeft(k), LANE_Y, 1, intro);
+    laneEls[k].count.textContent = items.filter(it => it.lane === k && t >= it.c - 0.08).length;
+  });
+  items.forEach(it => {
+    const p = easeOut(prog(t, it.c - 0.12, it.c + 0.1));
+    place(it.chip, laneLeft(it.lane), CHIP_Y0 + it.slot * CHIP_STEP + lerp(-6, 0, p), 1, p * (1 - outroP * 0.15));
+  });
+
+  // summary
+  place(summary, 0, lerp(24, 0, outroP), 1, outroP);
+}
+
+// ---------- scale stage to window, play or capture ----------
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1350);
+  stage.style.transform = `scale(${s})`;
+  stage.style.position = "absolute";
+  stage.style.left = `${(innerWidth - 1080 * s) / 2}px`;
+  stage.style.top = `${(innerHeight - 1350 * s) / 2}px`;
+}
+window.TOTAL = TOTAL;
+window.renderAt = renderAt;
+const capture = new URLSearchParams(location.search).has("capture");
+if (capture) {
+  stage.style.position = "absolute"; stage.style.left = "0"; stage.style.top = "0";
+  renderAt(0);
+} else {
+  fit(); addEventListener("resize", fit);
+  const start = performance.now();
+  const loop = now => { renderAt(((now - start) / 1000) % TOTAL); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>

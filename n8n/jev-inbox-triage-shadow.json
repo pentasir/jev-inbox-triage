@@ -1,0 +1,361 @@
+{
+  "name": "Jev inbox triage (shadow mode)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Jev inbox triage (shadow mode)\nLabels and alerts only. Nothing is sent to customers.\n\n1. Gmail credential on the trigger and the 4 label nodes\n2. Header Auth credential on **Ask Jev**: name `Authorization`, value `Bearer <TypeSafe key>`\n3. Create the 4 Gmail labels, pick one per label node\n4. Slack channel on **Alert: Human now**\n5. Google Sheet for the shadow report on **Log to sheet**\n6. Edit STORE in **Build Jev request** for this client",
+        "height": 340,
+        "width": 520
+      },
+      "name": "Sticky: read me",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ]
+        },
+        "options": {}
+      },
+      "name": "New email",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// CONFIG: describe the client's store in one sentence. Jev uses it as context.\nconst STORE = \"A small online skincare store in New Zealand selling cleansers, serums, moisturisers, night cream and toner.\";\nconst MAX_CHARS = 3000; // long threads cost more and add noise; keep the newest message only\n\nconst QUESTIONS = {\n  \"topic\": {\n    \"type\": \"choice\",\n    \"instructions\": \"What is `email.text` mainly about?\",\n    \"criteria\": {\n      \"where_is_order\": \"An order that has not arrived yet, is late, or has tracking that is stuck\",\n      \"damaged_or_wrong\": \"An item that arrived broken, leaking, missing, or not what was ordered\",\n      \"refund_return\": \"Returning an item, exchanging it, cancelling an order, or getting money back\",\n      \"product_question\": \"How to use a product, its ingredients, whether it suits someone, or its effects on skin or health\",\n      \"other\": \"None of the above, such as discount codes, address changes, subscriptions, wholesale or business enquiries\"\n    }\n  },\n  \"urgency\": {\n    \"type\": \"score\",\n    \"instructions\": \"How soon does the sender of `email.text` need a reply?\",\n    \"criteria\": [\n      \"No deadline is mentioned or implied\",\n      \"The sender wants a reply soon, but nothing goes wrong if it waits a day\",\n      \"Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health\"\n    ]\n  },\n  \"frustration\": {\n    \"type\": \"score\",\n    \"instructions\": \"How does the sender of `email.text` feel about the store?\",\n    \"criteria\": [\n      \"Friendly or neutral; just asking a question or letting the store know something\",\n      \"Unhappy about a problem but polite, and still expects the store to fix it\",\n      \"Angry, has given up on the store, or says they will stop buying\"\n    ]\n  },\n  \"safety_issue\": {\n    \"type\": \"noul\",\n    \"instructions\": \"Does `email.text` describe possible harm to a person's body?\",\n    \"criteria\": {\n      \"true\": \"A skin reaction, rash, allergy, injury, cut, burn, or someone swallowing a product\",\n      \"false\": \"No harm to any person is described; damage to items or packaging alone does not count\"\n    }\n  },\n  \"legal_or_chargeback\": {\n    \"type\": \"noul\",\n    \"instructions\": \"Does `email.text` mention a chargeback, a bank or card dispute, a lawyer, the Commerce Commission, or consumer law?\"\n  },\n  \"public_complaint\": {\n    \"type\": \"noul\",\n    \"instructions\": \"Does the sender of `email.text` say they might complain publicly, such as posting a bad review or posting on social media?\"\n  },\n  \"refund_requested\": {\n    \"type\": \"noul\",\n    \"instructions\": \"Is the sender of `email.text` asking for their money back?\",\n    \"criteria\": {\n      \"true\": \"Asks for a refund, money back, a chargeback, or to cancel an order and be repaid\",\n      \"false\": \"Does not ask for money back; asking for a replacement or exchange does not count\"\n    }\n  },\n  \"is_pitch\": {\n    \"type\": \"noul\",\n    \"instructions\": \"Is `email.text` from a business offering to sell its own services to the store?\",\n    \"criteria\": {\n      \"true\": \"An agency, marketer, SEO seller, developer, designer or influencer offering paid work, including free audits or calls that lead to paid work\",\n      \"false\": \"A customer, or a business that wants to buy or stock the store's products, such as a wholesale enquiry\"\n    }\n  }\n};\n\nconst e = $json;\nconst raw = e.text || (e.textAsHtml || e.html || \"\").replace(/<[^>]+>/g, \" \") || e.snippet || \"\";\n// Keep only the newest message: drop quoted history and \"On ... wrote:\" blocks.\nconst newest = raw\n  .split(/\\r?\\nOn .+wrote:\\r?\\n|\\r?\\n-{2,} ?Original Message|\\r?\\nFrom: .+\\r?\\nSent: /)[0]\n  .split(\"\\n\").filter(line => !line.trim().startsWith(\">\")).join(\"\\n\")\n  .trim().slice(0, MAX_CHARS);\nconst sender = e.from?.value?.[0] ?? {};\nconst fromName = sender.name || sender.address || e.from?.text || \"unknown\";\n\nreturn {\n  json: {\n    emailId: e.id,\n    threadId: e.threadId,\n    from: fromName,\n    fromAddress: sender.address || \"\",\n    subject: e.subject || \"\",\n    payload: {\n      model: \"jev-latest\",\n      state: { store: STORE, email: { from: fromName, subject: e.subject || \"\", text: newest } },\n      questions: QUESTIONS,\n    },\n  },\n};\n"
+      },
+      "name": "Build Jev request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.typesafe.ai/v1/systemone",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "name": "Ask Jev",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Lane rules, ported line for line from triage.py decide(). Order matters:\n// safety checks run before anything automated.\nconst RISK_AT = 0.3, PITCH_AT = 0.8, LO = 0.3, HI = 0.7, TOPIC_CONF_MIN = 0.6;\nconst RISK_NOULS = {\"safety_issue\": \"health or safety\", \"legal_or_chargeback\": \"legal or chargeback\", \"public_complaint\": \"public complaint\"};\nconst AUTO_ACTIONS = {\"where_is_order\": \"Auto-reply with live tracking\", \"damaged_or_wrong\": \"Auto-reply asking for a photo, priority queue\", \"refund_return\": \"Auto-reply with returns form\"};\n\nfunction decide(a) {\n  const topic = a.topic.choice, topicConf = a.topic.confidence;\n  const pitch = a.is_pitch.noul, refund = a.refund_requested.noul;\n  const frustration = a.frustration.score, urgency = a.urgency.score;\n  const flagged = Object.keys(RISK_NOULS).filter(q => a[q].noul >= RISK_AT).map(q => RISK_NOULS[q]);\n\n  if (flagged.length) return [\"human_now\", \"Risk flagged: \" + flagged.join(\", \")];\n  if (pitch >= PITCH_AT) return [\"archive\", \"Sales pitch\"];\n  if (frustration >= 1.5) return [\"human_now\", \"Customer close to leaving\"];\n  if (refund >= HI && frustration >= 0.75) return [\"human_now\", \"Upset and asking for money back\"];\n  if (topicConf < TOPIC_CONF_MIN || (LO < pitch && pitch < PITCH_AT) || (LO < refund && refund < HI))\n    return [\"human_queue\", \"Model unsure, left for a person\"];\n  if (topic in AUTO_ACTIONS) return [\"auto\", AUTO_ACTIONS[topic]];\n  if (urgency >= 1.5) return [\"human_now\", \"Needs a reply today\"];\n  if (topic === \"product_question\") return [\"human_queue\", \"Product question, reply drafted for review\"];\n  return [\"human_queue\", \"Needs a person\"];\n}\n\nconst a = $json.answers;\nconst src = $('Build Jev request').item.json;\nconst [lane, reason] = decide(a);\n\nreturn {\n  json: {\n    logged_at: new Date().toISOString(),\n    lane,\n    reason,\n    emailId: src.emailId,\n    threadId: src.threadId,\n    from: src.from,\n    fromAddress: src.fromAddress,\n    subject: src.subject,\n    gmailLink: `https://mail.google.com/mail/u/0/#all/${src.threadId}`,\n    topic: a.topic.choice,\n    topic_conf: a.topic.confidence,\n    urgency: a.urgency.score,\n    frustration: a.frustration.score,\n    safety: a.safety_issue.noul,\n    legal_or_chargeback: a.legal_or_chargeback.noul,\n    public_complaint: a.public_complaint.noul,\n    refund: a.refund_requested.noul,\n    pitch: a.is_pitch.noul,\n    input_tokens: $json.usage?.input_tokens ?? null,\n    model: $json.model ?? null,\n  },\n};\n"
+      },
+      "name": "Decide lane",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Jev call failed (timeout, outage, bad key). Never drop an email: send it to a person.\nconst src = $('Build Jev request').item.json;\nreturn {\n  json: {\n    logged_at: new Date().toISOString(),\n    lane: \"human_queue\",\n    reason: \"Jev unavailable, left for a person\",\n    emailId: src.emailId,\n    threadId: src.threadId,\n    from: src.from,\n    fromAddress: src.fromAddress,\n    subject: src.subject,\n    gmailLink: `https://mail.google.com/mail/u/0/#all/${src.threadId}`,\n  },\n};\n"
+      },
+      "name": "Fail safe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 4,
+        "output": "={{ ['human_now', 'human_queue', 'auto', 'archive'].indexOf($json.lane) }}"
+      },
+      "name": "Route by lane",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1060,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "name": "Log to sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1060,
+        320
+      ],
+      "notes": "Shadow report: one row per email with every Jev score.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "addLabels",
+        "messageId": "={{ $json.emailId }}",
+        "labelIds": []
+      },
+      "name": "Label: Human now",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        -260
+      ],
+      "notes": "Pick the Gmail label \"Jev/1 Human now\" (create it in Gmail first).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "addLabels",
+        "messageId": "={{ $json.emailId }}",
+        "labelIds": []
+      },
+      "name": "Label: Human queue",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        -80
+      ],
+      "notes": "Pick the Gmail label \"Jev/2 Human queue\" (create it in Gmail first).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "addLabels",
+        "messageId": "={{ $json.emailId }}",
+        "labelIds": []
+      },
+      "name": "Label: Automated",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        100
+      ],
+      "notes": "Pick the Gmail label \"Jev/3 Would automate\" (create it in Gmail first).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "addLabels",
+        "messageId": "={{ $json.emailId }}",
+        "labelIds": []
+      },
+      "name": "Label: Archived",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        280
+      ],
+      "notes": "Pick the Gmail label \"Jev/4 Would archive\" (create it in Gmail first).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#inbox-urgent"
+        },
+        "text": "=:red_circle: *Human now*: {{ $('Route by lane').item.json.reason }}\nFrom: {{ $('Route by lane').item.json.from }} <{{ $('Route by lane').item.json.fromAddress }}>\nSubject: {{ $('Route by lane').item.json.subject }}\n<{{ $('Route by lane').item.json.gmailLink }}|Open in Gmail>",
+        "otherOptions": {}
+      },
+      "name": "Alert: Human now",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1820,
+        -260
+      ]
+    }
+  ],
+  "connections": {
+    "New email": {
+      "main": [
+        [
+          {
+            "node": "Build Jev request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Jev request": {
+      "main": [
+        [
+          {
+            "node": "Ask Jev",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Jev": {
+      "main": [
+        [
+          {
+            "node": "Decide lane",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fail safe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide lane": {
+      "main": [
+        [
+          {
+            "node": "Route by lane",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fail safe": {
+      "main": [
+        [
+          {
+            "node": "Route by lane",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by lane": {
+      "main": [
+        [
+          {
+            "node": "Label: Human now",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label: Human queue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label: Automated",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label: Archived",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label: Human now": {
+      "main": [
+        [
+          {
+            "node": "Alert: Human now",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

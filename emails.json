@@ -1,0 +1,122 @@
+[
+  {
+    "id": "e01",
+    "from": "Mere",
+    "text": "Hi there, just checking on order #10482, placed on the 24th. Haven't had a tracking update in a few days. Thanks, Mere",
+    "expected": {"topic": "where_is_order", "risk": "none", "pitch": false, "lane": "auto"}
+  },
+  {
+    "id": "e02",
+    "from": "Josh",
+    "text": "Tracking has said 'in transit' at the Auckland depot for 6 days now. Order 10528. Is it lost??",
+    "expected": {"topic": "where_is_order", "risk": "none", "pitch": false, "lane": "auto"}
+  },
+  {
+    "id": "e03",
+    "from": "Karen",
+    "text": "This is the SECOND time my order has been late. Order #10533. Honestly I just want my money back at this point, I'll buy somewhere else.",
+    "expected": {"topic": "refund_return", "also_ok_topic": ["where_is_order"], "risk": "none", "pitch": false, "lane": "human_now"}
+  },
+  {
+    "id": "e04",
+    "from": "Tama",
+    "text": "Ordered this for my mum's birthday, which was YESTERDAY. Still nothing. Really disappointed. #10541",
+    "expected": {"topic": "where_is_order", "risk": "none", "pitch": false, "lane": "human_now", "also_ok_lane": ["human_queue"]}
+  },
+  {
+    "id": "e05",
+    "from": "Priya",
+    "text": "The pump on my vitamin C serum arrived broken and there's serum all over the box. Order 10498. Could I get a replacement please?",
+    "expected": {"topic": "damaged_or_wrong", "risk": "none", "pitch": false, "lane": "auto"}
+  },
+  {
+    "id": "e06",
+    "from": "Liam",
+    "text": "Third parcel from you that's turned up smashed. Glass jar in pieces, cut my finger opening it. I don't want a replacement, refund me.",
+    "expected": {"topic": "damaged_or_wrong", "also_ok_topic": ["refund_return"], "risk": "health_or_safety", "pitch": false, "lane": "human_now"}
+  },
+  {
+    "id": "e07",
+    "from": "Sophie",
+    "text": "I used the night cream last night and woke up with a red, itchy rash around my eyes. Is this normal? Should I stop using it?",
+    "expected": {"topic": "product_question", "risk": "health_or_safety", "pitch": false, "lane": "human_now"}
+  },
+  {
+    "id": "e08",
+    "from": "Hannah",
+    "text": "Hey! Is the night cream ok to use alongside retinol, or should I alternate nights? Love your stuff x",
+    "expected": {"topic": "product_question", "risk": "none", "pitch": false, "lane": "human_queue"}
+  },
+  {
+    "id": "e09",
+    "from": "Ben",
+    "text": "My 3 year old got hold of the gentle cleanser and I think she swallowed some. What's in it? Is it toxic? Please reply asap",
+    "expected": {"topic": "product_question", "risk": "health_or_safety", "pitch": false, "lane": "human_now"}
+  },
+  {
+    "id": "e10",
+    "from": "Rachel",
+    "text": "I've emailed three times about my missing order #10467 and nobody has replied. If I don't hear back by Friday I'm doing a chargeback with my bank.",
+    "expected": {"topic": "where_is_order", "risk": "legal_or_chargeback", "pitch": false, "lane": "human_now"}
+  },
+  {
+    "id": "e11",
+    "from": "Jade",
+    "text": "The toner leaked through my whole handbag and ruined it. I've got 40k followers on TikTok and I'm honestly tempted to post about how this has been handled.",
+    "expected": {"topic": "damaged_or_wrong", "risk": "public_complaint", "pitch": false, "lane": "human_now"}
+  },
+  {
+    "id": "e12",
+    "from": "Anna",
+    "text": "Hi, the moisturiser just isn't right for my skin unfortunately. I've got a second jar that's still sealed. Can I return it? Order #10471",
+    "expected": {"topic": "refund_return", "risk": "none", "pitch": false, "lane": "auto"}
+  },
+  {
+    "id": "e13",
+    "from": "Wiremu",
+    "text": "Oops, I put my old address on order #10550! Can you please change it to 14 Rata Street, Hamilton before it ships today?",
+    "expected": {"topic": "other", "also_ok_topic": ["where_is_order"], "risk": "none", "pitch": false, "lane": "human_now", "also_ok_lane": ["human_queue"]}
+  },
+  {
+    "id": "e14",
+    "from": "Claire",
+    "text": "Hello, I own a small day spa in Tauranga and we'd love to stock your range. Do you offer wholesale pricing?",
+    "expected": {"topic": "other", "risk": "none", "pitch": false, "lane": "human_queue"}
+  },
+  {
+    "id": "e15",
+    "from": "Growth Team",
+    "text": "Hi! We're a UGC agency helping skincare brands like yours 10x their TikTok sales. Free strategy call this week?",
+    "expected": {"topic": "other", "risk": "none", "pitch": true, "lane": "archive"}
+  },
+  {
+    "id": "e16",
+    "from": "Digital Solutions",
+    "text": "Dear Business Owner, I noticed your website is not ranking on the first page of Google. We offer affordable SEO packages starting from $99/month.",
+    "expected": {"topic": "other", "risk": "none", "pitch": true, "lane": "archive"}
+  },
+  {
+    "id": "e17",
+    "from": "Marcus",
+    "text": "Hi, I was browsing your store and noticed your checkout is really slow on mobile. I'm a developer and could fix that for you. Free audit if you're keen?",
+    "expected": {"topic": "other", "risk": "none", "pitch": true, "lane": "archive"}
+  },
+  {
+    "id": "e18",
+    "from": "Aroha",
+    "text": "Kia ora, I ordered the gentle cleanser but got the exfoliating one instead. Happy to swap, just let me know what to do. Ngā mihi, Aroha",
+    "expected": {"topic": "damaged_or_wrong", "risk": "none", "pitch": false, "lane": "auto"}
+  },
+  {
+    "id": "e19",
+    "from": "Emma",
+    "text": "Your WELCOME10 code isn't working at checkout. Tried three times.",
+    "expected": {"topic": "other", "risk": "none", "pitch": false, "lane": "human_queue"}
+  },
+  {
+    "id": "e20",
+    "from": "unknown",
+    "text": "order??",
+    "expected": {"topic": "where_is_order", "risk": "none", "pitch": false, "lane": "auto", "also_ok_lane": ["human_queue"]}
+  }
+]

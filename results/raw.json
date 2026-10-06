@@ -1,0 +1,1502 @@
+[
+  {
+    "id": "e01",
+    "latency_ms": 375,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "where_is_order",
+          "confidence": 1.0,
+          "probabilities": {
+            "refund_return": 0.0,
+            "other": 0.0,
+            "damaged_or_wrong": 0.0,
+            "product_question": 0.0,
+            "where_is_order": 1.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.81,
+          "confidence": 0.71,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.19,
+            "1": 0.81,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.39,
+          "confidence": 0.42,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.61,
+            "1": 0.39,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1008,
+        "output_tokens": 184
+      }
+    }
+  },
+  {
+    "id": "e02",
+    "latency_ms": 290,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.04
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "topic": {
+          "type": "choice",
+          "choice": "where_is_order",
+          "confidence": 1.0,
+          "probabilities": {
+            "damaged_or_wrong": 0.0,
+            "other": 0.0,
+            "product_question": 0.0,
+            "where_is_order": 1.0,
+            "refund_return": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.98,
+          "confidence": 0.88,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.05,
+            "1": 0.92,
+            "2": 0.03
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.95,
+          "confidence": 0.92,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.05,
+            "1": 0.95,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1000,
+        "output_tokens": 184
+      }
+    }
+  },
+  {
+    "id": "e03",
+    "latency_ms": 338,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "frustration": {
+          "type": "score",
+          "score": 2.0,
+          "confidence": 1.0,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 1.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.03
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.98
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "topic": {
+          "type": "choice",
+          "choice": "where_is_order",
+          "confidence": 0.41,
+          "probabilities": {
+            "refund_return": 0.47,
+            "where_is_order": 0.53,
+            "damaged_or_wrong": 0.0,
+            "other": 0.0,
+            "product_question": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.0,
+          "confidence": 0.75,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.08,
+            "1": 0.84,
+            "2": 0.08
+          }
+        }
+      },
+      "usage": {
+        "input_tokens": 1007,
+        "output_tokens": 184
+      }
+    }
+  },
+  {
+    "id": "e04",
+    "latency_ms": 329,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "where_is_order",
+          "confidence": 1.0,
+          "probabilities": {
+            "where_is_order": 1.0,
+            "other": 0.0,
+            "refund_return": 0.0,
+            "damaged_or_wrong": 0.0,
+            "product_question": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.4,
+          "confidence": 0.1,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.07,
+            "1": 0.46,
+            "2": 0.47
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 1.07,
+          "confidence": 0.89,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.93,
+            "2": 0.07
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.44
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.07
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 999,
+        "output_tokens": 184
+      }
+    }
+  },
+  {
+    "id": "e05",
+    "latency_ms": 328,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "frustration": {
+          "type": "score",
+          "score": 0.99,
+          "confidence": 0.99,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.01,
+            "1": 0.99,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "topic": {
+          "type": "choice",
+          "choice": "damaged_or_wrong",
+          "confidence": 1.0,
+          "probabilities": {
+            "where_is_order": 0.0,
+            "refund_return": 0.0,
+            "other": 0.0,
+            "product_question": 0.0,
+            "damaged_or_wrong": 1.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.55,
+          "confidence": 0.31,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.46,
+            "1": 0.54,
+            "2": 0.0
+          }
+        }
+      },
+      "usage": {
+        "input_tokens": 1005,
+        "output_tokens": 185
+      }
+    }
+  },
+  {
+    "id": "e06",
+    "latency_ms": 327,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "damaged_or_wrong",
+          "confidence": 0.53,
+          "probabilities": {
+            "damaged_or_wrong": 0.63,
+            "other": 0.0,
+            "refund_return": 0.37,
+            "where_is_order": 0.0,
+            "product_question": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.16,
+          "confidence": 0.44,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.11,
+            "1": 0.62,
+            "2": 0.27
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 1.82,
+          "confidence": 0.74,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.17,
+            "2": 0.83
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.98
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.99
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1003,
+        "output_tokens": 185
+      }
+    }
+  },
+  {
+    "id": "e07",
+    "latency_ms": 250,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "product_question",
+          "confidence": 1.0,
+          "probabilities": {
+            "damaged_or_wrong": 0.0,
+            "other": 0.0,
+            "where_is_order": 0.0,
+            "product_question": 1.0,
+            "refund_return": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.97,
+          "confidence": 0.96,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.02,
+            "2": 0.98
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.61,
+          "confidence": 0.41,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.39,
+            "1": 0.61,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.98
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1004,
+        "output_tokens": 183
+      }
+    }
+  },
+  {
+    "id": "e08",
+    "latency_ms": 392,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "topic": {
+          "type": "choice",
+          "choice": "product_question",
+          "confidence": 1.0,
+          "probabilities": {
+            "refund_return": 0.0,
+            "damaged_or_wrong": 0.0,
+            "where_is_order": 0.0,
+            "product_question": 1.0,
+            "other": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.24,
+          "confidence": 0.64,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.76,
+            "1": 0.24,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.0,
+          "confidence": 1.0,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 1.0,
+            "1": 0.0,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.08
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 996,
+        "output_tokens": 183
+      }
+    }
+  },
+  {
+    "id": "e09",
+    "latency_ms": 337,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "product_question",
+          "confidence": 1.0,
+          "probabilities": {
+            "product_question": 1.0,
+            "refund_return": 0.0,
+            "damaged_or_wrong": 0.0,
+            "where_is_order": 0.0,
+            "other": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 2.0,
+          "confidence": 1.0,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 1.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.17,
+          "confidence": 0.74,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.83,
+            "1": 0.17,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.98
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1003,
+        "output_tokens": 183
+      }
+    }
+  },
+  {
+    "id": "e10",
+    "latency_ms": 313,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "where_is_order",
+          "confidence": 1.0,
+          "probabilities": {
+            "refund_return": 0.0,
+            "where_is_order": 1.0,
+            "damaged_or_wrong": 0.0,
+            "other": 0.0,
+            "product_question": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.28,
+          "confidence": 0.53,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.02,
+            "1": 0.69,
+            "2": 0.29
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 1.85,
+          "confidence": 0.77,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.15,
+            "2": 0.85
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.99
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.79
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1010,
+        "output_tokens": 184
+      }
+    }
+  },
+  {
+    "id": "e11",
+    "latency_ms": 318,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "damaged_or_wrong",
+          "confidence": 1.0,
+          "probabilities": {
+            "refund_return": 0.0,
+            "damaged_or_wrong": 1.0,
+            "product_question": 0.0,
+            "where_is_order": 0.0,
+            "other": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.3,
+          "confidence": 0.3,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.08,
+            "1": 0.54,
+            "2": 0.38
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 1.6,
+          "confidence": 0.4,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.39,
+            "2": 0.61
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.03
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.98
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.07
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.02
+        }
+      },
+      "usage": {
+        "input_tokens": 1009,
+        "output_tokens": 185
+      }
+    }
+  },
+  {
+    "id": "e12",
+    "latency_ms": 463,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "refund_return",
+          "confidence": 1.0,
+          "probabilities": {
+            "where_is_order": 0.0,
+            "damaged_or_wrong": 0.0,
+            "other": 0.0,
+            "product_question": 0.0,
+            "refund_return": 1.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.38,
+          "confidence": 0.43,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.62,
+            "1": 0.38,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.87,
+          "confidence": 0.8,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.13,
+            "1": 0.87,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.15
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.61
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1009,
+        "output_tokens": 183
+      }
+    }
+  },
+  {
+    "id": "e13",
+    "latency_ms": 383,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "other",
+          "confidence": 1.0,
+          "probabilities": {
+            "damaged_or_wrong": 0.0,
+            "product_question": 0.0,
+            "where_is_order": 0.0,
+            "refund_return": 0.0,
+            "other": 1.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 2.0,
+          "confidence": 1.0,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.0,
+            "1": 0.0,
+            "2": 1.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.14,
+          "confidence": 0.79,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.86,
+            "1": 0.14,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1007,
+        "output_tokens": 182
+      }
+    }
+  },
+  {
+    "id": "e14",
+    "latency_ms": 402,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "other",
+          "confidence": 1.0,
+          "probabilities": {
+            "refund_return": 0.0,
+            "other": 1.0,
+            "damaged_or_wrong": 0.0,
+            "where_is_order": 0.0,
+            "product_question": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.03,
+          "confidence": 0.95,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.97,
+            "1": 0.03,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.0,
+          "confidence": 1.0,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 1.0,
+            "1": 0.0,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.02
+        }
+      },
+      "usage": {
+        "input_tokens": 998,
+        "output_tokens": 182
+      }
+    }
+  },
+  {
+    "id": "e15",
+    "latency_ms": 390,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "other",
+          "confidence": 1.0,
+          "probabilities": {
+            "refund_return": 0.0,
+            "damaged_or_wrong": 0.0,
+            "other": 1.0,
+            "product_question": 0.0,
+            "where_is_order": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.94,
+          "confidence": 0.9,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.06,
+            "1": 0.94,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.0,
+          "confidence": 1.0,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 1.0,
+            "1": 0.0,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.98
+        }
+      },
+      "usage": {
+        "input_tokens": 1001,
+        "output_tokens": 182
+      }
+    }
+  },
+  {
+    "id": "e16",
+    "latency_ms": 277,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.99
+        },
+        "topic": {
+          "type": "choice",
+          "choice": "other",
+          "confidence": 1.0,
+          "probabilities": {
+            "damaged_or_wrong": 0.0,
+            "other": 1.0,
+            "product_question": 0.0,
+            "where_is_order": 0.0,
+            "refund_return": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.01,
+          "confidence": 0.99,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.99,
+            "1": 0.01,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.05,
+          "confidence": 0.93,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.96,
+            "1": 0.04,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1002,
+        "output_tokens": 182
+      }
+    }
+  },
+  {
+    "id": "e17",
+    "latency_ms": 425,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "other",
+          "confidence": 1.0,
+          "probabilities": {
+            "other": 1.0,
+            "refund_return": 0.0,
+            "where_is_order": 0.0,
+            "damaged_or_wrong": 0.0,
+            "product_question": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.04,
+          "confidence": 0.95,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.96,
+            "1": 0.04,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.06,
+          "confidence": 0.91,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.94,
+            "1": 0.06,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.95
+        }
+      },
+      "usage": {
+        "input_tokens": 1006,
+        "output_tokens": 182
+      }
+    }
+  },
+  {
+    "id": "e18",
+    "latency_ms": 371,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "damaged_or_wrong",
+          "confidence": 0.62,
+          "probabilities": {
+            "other": 0.0,
+            "where_is_order": 0.0,
+            "product_question": 0.0,
+            "damaged_or_wrong": 0.7,
+            "refund_return": 0.3
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.5,
+          "confidence": 0.25,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.5,
+            "1": 0.5,
+            "2": 0.0
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.43,
+          "confidence": 0.35,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.57,
+            "1": 0.43,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.06
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.01
+        }
+      },
+      "usage": {
+        "input_tokens": 1014,
+        "output_tokens": 185
+      }
+    }
+  },
+  {
+    "id": "e19",
+    "latency_ms": 300,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "other",
+          "confidence": 1.0,
+          "probabilities": {
+            "refund_return": 0.0,
+            "product_question": 0.0,
+            "where_is_order": 0.0,
+            "other": 1.0,
+            "damaged_or_wrong": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.84,
+          "confidence": 0.65,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.2,
+            "1": 0.76,
+            "2": 0.04
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.96,
+          "confidence": 0.93,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.04,
+            "1": 0.96,
+            "2": 0.0
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.02
+        }
+      },
+      "usage": {
+        "input_tokens": 988,
+        "output_tokens": 182
+      }
+    }
+  },
+  {
+    "id": "e20",
+    "latency_ms": 353,
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "topic": {
+          "type": "choice",
+          "choice": "where_is_order",
+          "confidence": 0.63,
+          "probabilities": {
+            "where_is_order": 0.71,
+            "product_question": 0.0,
+            "other": 0.29,
+            "damaged_or_wrong": 0.0,
+            "refund_return": 0.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 0.42,
+          "confidence": 0.36,
+          "legend": {
+            "0": "No deadline is mentioned or implied",
+            "1": "The sender wants a reply soon, but nothing goes wrong if it waits a day",
+            "2": "Something goes wrong without a reply today, such as an order about to ship, a deadline today, or a person's health"
+          },
+          "probabilities": {
+            "0": 0.58,
+            "1": 0.41,
+            "2": 0.01
+          }
+        },
+        "frustration": {
+          "type": "score",
+          "score": 0.12,
+          "confidence": 0.81,
+          "legend": {
+            "0": "Friendly or neutral; just asking a question or letting the store know something",
+            "1": "Unhappy about a problem but polite, and still expects the store to fix it",
+            "2": "Angry, has given up on the store, or says they will stop buying"
+          },
+          "probabilities": {
+            "0": 0.88,
+            "1": 0.11,
+            "2": 0.01
+          }
+        },
+        "safety_issue": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "legal_or_chargeback": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "public_complaint": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "refund_requested": {
+          "type": "noul",
+          "noul": 0.06
+        },
+        "is_pitch": {
+          "type": "noul",
+          "noul": 0.02
+        }
+      },
+      "usage": {
+        "input_tokens": 973,
+        "output_tokens": 184
+      }
+    }
+  }
+]

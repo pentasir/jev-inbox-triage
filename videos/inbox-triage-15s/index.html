@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1350">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* Apple dark-mode language: true black canvas, one sans family, system colours,
+         translucent grouped surfaces, continuous large radii, calm decelerating motion. */
+      :root {
+        --bg: #000000;
+        --surface: rgba(28, 28, 30, 0.86);
+        --surface-2: #1c1c1e;
+        --hairline: rgba(255, 255, 255, 0.12);
+        --label: #f5f5f7;
+        --secondary: #a1a1a6;
+        --blue: #0a84ff;
+        --red: #ff453a;
+        --orange: #ff9f0a;
+        --green: #30d158;
+        --gray: #8e8e93;
+        --sans: Inter, sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; overflow: hidden; background: var(--bg); }
+      #root {
+        width: 100%; height: 100%; position: relative; overflow: hidden;
+        background: var(--bg); color: var(--label); font-family: var(--sans);
+        font-variant-numeric: tabular-nums;
+      }
+      .layer { position: absolute; inset: 0; }
+
+      .think {
+        position: absolute; left: 60px; width: 960px; border-radius: 56px;
+        filter: blur(22px); will-change: opacity;
+      }
+
+      #eyebrow { position: absolute; left: 72px; top: 76px; font: 700 28px/1 var(--sans); color: var(--secondary); letter-spacing: -0.01em; }
+      #foot {
+        position: absolute; left: 72px; right: 72px; top: 1284px;
+        display: flex; justify-content: space-between;
+        font: 400 24px/1 var(--sans); color: var(--secondary);
+      }
+
+      /* scene A */
+      #headline { position: absolute; left: 72px; top: 124px; width: 936px; font: 700 96px/1.02 var(--sans); letter-spacing: -0.045em; }
+      #headline .dim { color: #6e6e73; }
+
+      .card {
+        position: absolute; left: 72px; top: 380px; width: 936px;
+        border-radius: 44px; padding: 34px 40px 36px;
+        background: var(--surface); border: 2px solid var(--hairline);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+        transform-origin: 50% 50%; will-change: transform, opacity;
+      }
+      .mailhead { display: flex; align-items: center; gap: 20px; }
+      .avatar {
+        display: flex; align-items: center; justify-content: center; flex: none;
+        width: 68px; height: 68px; border-radius: 50%;
+        background: linear-gradient(180deg, #8e8e93, #636366); font: 700 32px/1 var(--sans); color: #fff;
+      }
+      .sender { flex: 1; font: 700 32px/1.1 var(--sans); letter-spacing: -0.01em; }
+      .stamp { display: flex; align-items: center; gap: 10px; font: 400 26px/1 var(--sans); color: var(--secondary); }
+      .stamp .jdot { display: block; width: 12px; height: 12px; border-radius: 50%; background: var(--blue); }
+      .card .text { font: 400 38px/1.3 var(--sans); margin-top: 24px; letter-spacing: -0.01em; }
+      .tags { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+      .tag { display: block; font: 700 26px/1 var(--sans); padding: 12px 20px; border-radius: 999px; background: rgba(142, 142, 147, 0.24); color: var(--label); }
+      .tag.risk { background: rgba(255, 69, 58, 0.22); color: #ff8a82; }
+      .tag.pitch { background: rgba(142, 142, 147, 0.3); color: #d1d1d6; }
+      .tag.refund { background: rgba(255, 159, 10, 0.2); color: #ffc266; }
+      .verdict {
+        display: flex; align-items: center; gap: 16px; margin-top: 28px; padding-top: 26px;
+        border-top: 2px solid var(--hairline); transform-origin: 0 50%;
+      }
+      .verdict .vdot { display: block; width: 18px; height: 18px; border-radius: 50%; flex: none; }
+      .verdict .lane-name { font: 700 36px/1 var(--sans); letter-spacing: -0.02em; }
+      .verdict .why { font: 400 30px/1 var(--sans); color: var(--secondary); }
+      .glow { position: absolute; left: -40px; top: 320px; width: 1160px; height: 640px; border-radius: 50%; will-change: transform, opacity; }
+
+      .qcard {
+        position: absolute; left: 72px; top: 560px; width: 936px; height: 132px;
+        border-radius: 36px; padding: 0 32px; background: var(--surface); border: 2px solid var(--hairline);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+        display: flex; align-items: center; gap: 22px; transform-origin: 50% 50%; will-change: transform, opacity;
+      }
+      .qcard .avatar { width: 60px; height: 60px; font-size: 28px; }
+      .qcard .qbody { flex: 1; min-width: 0; }
+      .qcard .qfrom { display: block; font: 700 28px/1.1 var(--sans); }
+      .qcard .qtext { display: block; margin-top: 6px; font: 400 28px/1.2 var(--sans); color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .qcard .qlane { flex: none; display: block; font: 700 26px/1 var(--sans); padding: 12px 18px; border-radius: 999px; }
+
+      .tile {
+        position: absolute; top: 966px; width: 222px; height: 256px;
+        border-radius: 36px; padding: 24px; background: var(--surface-2); border: 2px solid var(--hairline);
+      }
+      .tile .name { display: flex; align-items: center; gap: 8px; font: 700 23px/1 var(--sans); white-space: nowrap; color: var(--secondary); }
+      .tile .ldot { display: block; width: 14px; height: 14px; border-radius: 50%; flex: none; }
+      .tile .count { display: block; width: 110px; margin-top: 14px; font: 700 72px/1 var(--sans); letter-spacing: -0.04em; transform-origin: 0 70%; }
+      .token { position: absolute; width: 36px; height: 36px; border-radius: 50%; will-change: transform, opacity; }
+      .token.miss { background: transparent !important; border: 4px dashed var(--orange); }
+
+      /* scene B: keynote stat slide */
+      #sceneB { opacity: 0; }
+      #big { position: absolute; left: 72px; top: 250px; width: 936px; display: flex; align-items: baseline; gap: 28px; }
+      #big-num { display: inline-block; font: 700 330px/0.9 var(--sans); letter-spacing: -0.06em; transform-origin: 0 85%; }
+      #big-den { display: inline-block; font: 700 110px/1 var(--sans); letter-spacing: -0.04em; color: #6e6e73; }
+      #lede { position: absolute; left: 72px; top: 600px; width: 936px; font: 700 56px/1.1 var(--sans); letter-spacing: -0.03em; }
+      #sub { position: absolute; left: 72px; top: 680px; width: 936px; font: 400 38px/1.3 var(--sans); color: var(--secondary); letter-spacing: -0.01em; }
+      .cols { position: absolute; left: 72px; top: 900px; width: 936px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+      .col { border-top: 2px solid var(--hairline); padding-top: 30px; }
+      .col .val { display: block; font: 700 84px/1 var(--sans); letter-spacing: -0.045em; white-space: nowrap; transform-origin: 0 70%; }
+      .col .lbl { display: block; margin-top: 18px; font: 400 28px/1.3 var(--sans); color: var(--secondary); }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-2yz7" id="root" data-composition-id="main" data-start="0" data-duration="15" data-width="1080" data-height="1350">
+
+      <div data-hf-id="hf-uzbs" id="sceneA" class="layer">
+        <div data-hf-id="hf-nicb" id="headline">Which emails <span data-hf-id="hf-2z9s" class="dim">need a human?</span></div>
+        <div data-hf-id="hf-b26p" id="glows"></div>
+        <div data-hf-id="hf-67ow" id="tiles"></div>
+        <div data-hf-id="hf-nia2" id="cards"></div>
+      </div>
+
+      <div data-hf-id="hf-3n7n" id="sceneB" class="layer">
+        <div data-hf-id="hf-wcdx" id="big"><span data-hf-id="hf-bro1" id="big-num">0</span><span data-hf-id="hf-k2lr" id="big-den">of 20</span></div>
+        <div data-hf-id="hf-6fag" id="lede">sent to the right place.</div>
+        <div data-hf-id="hf-z4hi" id="sub">The one it wasn't sure about went to a person.</div>
+        <div data-hf-id="hf-6ra9" class="cols">
+          <div data-hf-id="hf-7s1i" class="col"><span data-hf-id="hf-tam9" class="val" id="v-risky">0</span><span data-hf-id="hf-hq8k" class="lbl">risky emails sent to automation</span></div>
+          <div data-hf-id="hf-vmze" class="col"><span data-hf-id="hf-bes3" class="val" id="v-ms">0 ms</span><span data-hf-id="hf-24yx" class="lbl">median time to judge an email</span></div>
+          <div data-hf-id="hf-w1af" class="col"><span data-hf-id="hf-e5ba" class="val" id="v-cost">0¢</span><span data-hf-id="hf-ampq" class="lbl" id="l-cost">a month at 600 emails</span></div>
+        </div>
+      </div>
+
+      <!--SFX-->
+      <audio data-hf-id="hf-02wp" id="sfx-00" src="assets/sfx/notification.mp3" data-start="0.10" data-media-start="0.08" data-duration="2.32" data-track-index="10" data-volume="0.5"></audio>
+      <audio data-hf-id="hf-emfd" id="sfx-01" src="assets/sfx/click-soft.mp3" data-start="0.75" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.35"></audio>
+      <audio data-hf-id="hf-pesn" id="sfx-02" src="assets/sfx/click-soft.mp3" data-start="0.93" data-media-start="0.04" data-duration="0.32" data-track-index="12" data-volume="0.35"></audio>
+      <audio data-hf-id="hf-xcuc" id="sfx-03" src="assets/sfx/click-soft.mp3" data-start="1.11" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.35"></audio>
+      <audio data-hf-id="hf-5boy" id="sfx-04" src="assets/sfx/ping.mp3" data-start="1.79" data-media-start="0.31" data-duration="0.99" data-track-index="11" data-volume="0.5"></audio>
+      <audio data-hf-id="hf-8vj6" id="sfx-05" src="assets/sfx/whoosh-short.mp3" data-start="2.76" data-media-start="0.0" data-duration="0.56" data-track-index="10" data-volume="0.3"></audio>
+      <audio data-hf-id="hf-m1fh" id="sfx-06" src="assets/sfx/notification.mp3" data-start="2.95" data-media-start="0.08" data-duration="2.32" data-track-index="11" data-volume="0.5"></audio>
+      <audio data-hf-id="hf-elox" id="sfx-07" src="assets/sfx/click-soft.mp3" data-start="3.60" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.35"></audio>
+      <audio data-hf-id="hf-c92d" id="sfx-08" src="assets/sfx/click-soft.mp3" data-start="3.78" data-media-start="0.04" data-duration="0.32" data-track-index="12" data-volume="0.35"></audio>
+      <audio data-hf-id="hf-s3bm" id="sfx-09" src="assets/sfx/pop.mp3" data-start="4.46" data-media-start="0.04" data-duration="0.66" data-track-index="10" data-volume="0.5"></audio>
+      <audio data-hf-id="hf-8h82" id="sfx-10" src="assets/sfx/whoosh-short.mp3" data-start="5.31" data-media-start="0.0" data-duration="0.56" data-track-index="10" data-volume="0.3"></audio>
+      <audio data-hf-id="hf-d7zo" id="sfx-11" src="assets/sfx/click-soft.mp3" data-start="6.05" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-949y" id="sfx-12" src="assets/sfx/click-soft.mp3" data-start="6.25" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-x2qm" id="sfx-13" src="assets/sfx/click-soft.mp3" data-start="6.45" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-2psw" id="sfx-14" src="assets/sfx/click-soft.mp3" data-start="6.65" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-m294" id="sfx-15" src="assets/sfx/click-soft.mp3" data-start="6.85" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-8wi1" id="sfx-16" src="assets/sfx/click-soft.mp3" data-start="7.05" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-8jrh" id="sfx-17" src="assets/sfx/click-soft.mp3" data-start="7.25" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-67tr" id="sfx-18" src="assets/sfx/click-soft.mp3" data-start="7.45" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-37pn" id="sfx-19" src="assets/sfx/click-soft.mp3" data-start="7.65" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-k1aa" id="sfx-20" src="assets/sfx/click-soft.mp3" data-start="7.85" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-nb4n" id="sfx-21" src="assets/sfx/click-soft.mp3" data-start="8.05" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-mf0h" id="sfx-22" src="assets/sfx/click-soft.mp3" data-start="8.25" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-d4d1" id="sfx-23" src="assets/sfx/click-soft.mp3" data-start="8.45" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-cx2v" id="sfx-24" src="assets/sfx/click-soft.mp3" data-start="8.65" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-q4pv" id="sfx-25" src="assets/sfx/click-soft.mp3" data-start="8.85" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-ay82" id="sfx-26" src="assets/sfx/click-soft.mp3" data-start="9.05" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-9a2q" id="sfx-27" src="assets/sfx/click-soft.mp3" data-start="9.25" data-media-start="0.04" data-duration="0.32" data-track-index="10" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-0950" id="sfx-28" src="assets/sfx/click-soft.mp3" data-start="9.45" data-media-start="0.04" data-duration="0.32" data-track-index="11" data-volume="0.22"></audio>
+      <audio data-hf-id="hf-3nx6" id="sfx-29" src="assets/sfx/whoosh.mp3" data-start="10.14" data-media-start="0.0" data-duration="0.56" data-track-index="10" data-volume="0.45"></audio>
+      <audio data-hf-id="hf-lqxx" id="sfx-30" src="assets/sfx/chime.mp3" data-start="11.75" data-media-start="0.41" data-duration="1.99" data-track-index="10" data-volume="1.3"></audio>
+      <!--END-SFX-->
+      <div data-hf-id="hf-0s86" id="eyebrow">Inbox triage with Jev</div>
+      <div data-hf-id="hf-l4at" id="foot"><span data-hf-id="hf-xjax" data-hf-text-key="child:0:span">Real model output · test inbox, not a live store</span></div>
+    </div>
+
+    <script>
+      const DATA = /*DATA*/{"items": [{"id": "e09", "from": "Ben", "text": "My 3 year old got hold of the gentle cleanser and I think she swallowed some. What's in it? Is it toxic? Please reply asap", "tags": [{"k": "topic", "t": "product question  1.00"}, {"k": "risk", "t": "safety  0.98"}, {"k": "refund", "t": "reply today"}], "lane": "human_now", "reason": "Risk flagged: health or safety", "ok": true, "ms": 337}, {"id": "e17", "from": "Marcus", "text": "Hi, I was browsing your store and noticed your checkout is really slow on mobile. I'm a developer and could fix that for you. Free audit if you're keen?", "tags": [{"k": "topic", "t": "other  1.00"}, {"k": "pitch", "t": "sales pitch  0.95"}], "lane": "archive", "reason": "Sales pitch", "ok": true, "ms": 425}, {"id": "e01", "from": "Mere", "text": "Hi there, just checking on order #10482, placed on the 24th. Haven't had a tracking update in a few days. Thanks, Mere", "tags": [{"k": "topic", "t": "where's my order  1.00"}], "lane": "auto", "reason": "Auto-reply with live tracking", "ok": true, "ms": 375}, {"id": "e02", "from": "Josh", "text": "Tracking has said 'in transit' at the Auckland depot for 6 days now. Order 10528. Is it lost??", "tags": [{"k": "topic", "t": "where's my order  1.00"}], "lane": "auto", "reason": "Auto-reply with live tracking", "ok": true, "ms": 290}, {"id": "e03", "from": "Karen", "text": "This is the SECOND time my order has been late. Order #10533. Honestly I just want my money back at this point, I'll buy somewhere else.", "tags": [{"k": "topic", "t": "where's my order  0.41"}, {"k": "refund", "t": "wants refund  0.98"}, {"k": "risk", "t": "about to leave"}], "lane": "human_now", "reason": "Customer close to leaving", "ok": true, "ms": 338}, {"id": "e04", "from": "Tama", "text": "Ordered this for my mum's birthday, which was YESTERDAY. Still nothing. Really disappointed. #10541", "tags": [{"k": "topic", "t": "where's my order  1.00"}, {"k": "risk", "t": "public complaint  0.44"}], "lane": "human_now", "reason": "Risk flagged: public complaint", "ok": true, "ms": 329}, {"id": "e05", "from": "Priya", "text": "The pump on my vitamin C serum arrived broken and there's serum all over the box. Order 10498. Could I get a replacement please?", "tags": [{"k": "topic", "t": "damaged or wrong  1.00"}], "lane": "auto", "reason": "Auto-reply asking for a photo, priority queue", "ok": true, "ms": 328}, {"id": "e06", "from": "Liam", "text": "Third parcel from you that's turned up smashed. Glass jar in pieces, cut my finger opening it. I don't want a replacement, refund me.", "tags": [{"k": "topic", "t": "damaged or wrong  0.53"}, {"k": "risk", "t": "safety  0.98"}, {"k": "refund", "t": "wants refund  0.99"}, {"k": "risk", "t": "about to leave"}], "lane": "human_now", "reason": "Risk flagged: health or safety", "ok": true, "ms": 327}, {"id": "e07", "from": "Sophie", "text": "I used the night cream last night and woke up with a red, itchy rash around my eyes. Is this normal? Should I stop using it?", "tags": [{"k": "topic", "t": "product question  1.00"}, {"k": "risk", "t": "safety  0.98"}, {"k": "refund", "t": "reply today"}], "lane": "human_now", "reason": "Risk flagged: health or safety", "ok": true, "ms": 250}, {"id": "e08", "from": "Hannah", "text": "Hey! Is the night cream ok to use alongside retinol, or should I alternate nights? Love your stuff x", "tags": [{"k": "topic", "t": "product question  1.00"}], "lane": "human_queue", "reason": "Product question, reply drafted for review", "ok": true, "ms": 392}, {"id": "e10", "from": "Rachel", "text": "I've emailed three times about my missing order #10467 and nobody has replied. If I don't hear back by Friday I'm doing a chargeback with my bank.", "tags": [{"k": "topic", "t": "where's my order  1.00"}, {"k": "risk", "t": "chargeback  0.99"}, {"k": "refund", "t": "wants refund  0.79"}, {"k": "risk", "t": "about to leave"}], "lane": "human_now", "reason": "Risk flagged: legal or chargeback", "ok": true, "ms": 313}, {"id": "e11", "from": "Jade", "text": "The toner leaked through my whole handbag and ruined it. I've got 40k followers on TikTok and I'm honestly tempted to post about how this has been handled.", "tags": [{"k": "topic", "t": "damaged or wrong  1.00"}, {"k": "risk", "t": "public complaint  0.98"}, {"k": "risk", "t": "about to leave"}], "lane": "human_now", "reason": "Risk flagged: public complaint", "ok": true, "ms": 318}, {"id": "e12", "from": "Anna", "text": "Hi, the moisturiser just isn't right for my skin unfortunately. I've got a second jar that's still sealed. Can I return it? Order #10471", "tags": [{"k": "topic", "t": "refund or return  1.00"}, {"k": "refund", "t": "wants refund  0.61"}], "lane": "human_queue", "reason": "Model unsure, left for a person", "ok": false, "ms": 463}, {"id": "e13", "from": "Wiremu", "text": "Oops, I put my old address on order #10550! Can you please change it to 14 Rata Street, Hamilton before it ships today?", "tags": [{"k": "topic", "t": "other  1.00"}, {"k": "refund", "t": "reply today"}], "lane": "human_now", "reason": "Needs a reply today", "ok": true, "ms": 383}, {"id": "e14", "from": "Claire", "text": "Hello, I own a small day spa in Tauranga and we'd love to stock your range. Do you offer wholesale pricing?", "tags": [{"k": "topic", "t": "other  1.00"}], "lane": "human_queue", "reason": "Needs a person", "ok": true, "ms": 402}, {"id": "e15", "from": "Growth Team", "text": "Hi! We're a UGC agency helping skincare brands like yours 10x their TikTok sales. Free strategy call this week?", "tags": [{"k": "topic", "t": "other  1.00"}, {"k": "pitch", "t": "sales pitch  0.98"}], "lane": "archive", "reason": "Sales pitch", "ok": true, "ms": 390}, {"id": "e16", "from": "Digital Solutions", "text": "Dear Business Owner, I noticed your website is not ranking on the first page of Google. We offer affordable SEO packages starting from $99/month.", "tags": [{"k": "topic", "t": "other  1.00"}, {"k": "pitch", "t": "sales pitch  0.99"}], "lane": "archive", "reason": "Sales pitch", "ok": true, "ms": 277}, {"id": "e18", "from": "Aroha", "text": "Kia ora, I ordered the gentle cleanser but got the exfoliating one instead. Happy to swap, just let me know what to do. Ngā mihi, Aroha", "tags": [{"k": "topic", "t": "damaged or wrong  0.62"}], "lane": "auto", "reason": "Auto-reply asking for a photo, priority queue", "ok": true, "ms": 371}, {"id": "e19", "from": "Emma", "text": "Your WELCOME10 code isn't working at checkout. Tried three times.", "tags": [{"k": "topic", "t": "other  1.00"}], "lane": "human_queue", "reason": "Needs a person", "ok": true, "ms": 300}, {"id": "e20", "from": "No name", "text": "order??", "tags": [{"k": "topic", "t": "where's my order  0.63"}], "lane": "auto", "reason": "Auto-reply with live tracking", "ok": true, "ms": 353}], "stats": {"n": 20, "correct": 19, "risky_automated": 0, "median_ms": 338, "monthly_cents": 2.5, "monthly_emails": 600, "model": "jev-1.13.0"}, "lanes": {"human_now": "Human now", "human_queue": "Human queue", "auto": "Automated", "archive": "Archived"}}/*END-DATA*/;
+
+      document.fonts.ready.then(() => {
+        const { items, stats, lanes: LANE_NAMES } = DATA;
+        const LANES = ["human_now", "human_queue", "auto", "archive"];
+        const COLOR = { human_now: "#ff453a", human_queue: "#ff9f0a", auto: "#30d158", archive: "#8e8e93" };
+        const TINT = { human_now: "rgba(255,69,58,0.2)", human_queue: "rgba(255,159,10,0.2)", auto: "rgba(48,209,88,0.2)", archive: "rgba(142,142,147,0.26)" };
+        const GLOW = { human_now: "rgba(255,69,58,0.5)", archive: "rgba(142,142,147,0.35)" };
+        const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+        const initial = name => (name === "No name" ? "?" : name.trim()[0].toUpperCase());
+
+        // Optional labels: skip any that were removed in Studio rather than crash the build.
+        const setText = (id, text) => { const e = document.getElementById(id); if (e) e.textContent = text; };
+        setText("foot-model", stats.model);
+        setText("big-den", `of ${stats.n}`);
+        setText("l-cost", `a month at ${stats.monthly_emails} emails`);
+
+        // ---------- layout constants (authored, CSS-matched) ----------
+        const TILE_W = 222, TILE_GAP = 16, LEFT = 72, TILE_TOP = 966, PAD = 24;
+        const tileLeft = k => LEFT + LANES.indexOf(k) * (TILE_W + TILE_GAP);
+        const TOKEN = 36, TOKEN_STEP = 46, TOKEN_TOP = TILE_TOP + PAD + 23 + 14 + 72 + 20;
+
+        const tilesEl = document.getElementById("tiles");
+        const laneCount = {};
+        LANES.forEach(k => {
+          const t = el("div", "tile");
+          t.style.left = `${tileLeft(k)}px`;
+          const name = el("div", "name");
+          const d = el("span", "ldot"); d.style.background = COLOR[k];
+          name.append(d, document.createTextNode(LANE_NAMES[k]));
+          const count = el("span", "count", "0");
+          t.append(name, count);
+          tilesEl.appendChild(t);
+          laneCount[k] = count;
+        });
+
+        const slotOf = {};
+        items.forEach(it => { slotOf[it.lane] = slotOf[it.lane] || 0; it.slot = slotOf[it.lane]++; });
+        items.forEach(it => {
+          const t = el("div", it.ok ? "token" : "token miss");
+          if (it.ok) t.style.background = COLOR[it.lane];
+          it.tx = tileLeft(it.lane) + PAD + (it.slot % 4) * TOKEN_STEP;
+          it.ty = TOKEN_TOP + Math.floor(it.slot / 4) * TOKEN_STEP;
+          t.style.left = `${it.tx}px`; t.style.top = `${it.ty}px`;
+          tilesEl.appendChild(t);
+          it.token = t;
+        });
+
+        // ---------- schedule ----------
+        const heroes = items.slice(0, 2);
+        const quick = items.slice(2);
+        const HERO = [{ enter: 0.1, dwell: 2.6 }, { enter: 2.95, dwell: 2.3 }];
+        heroes.forEach((it, i) => { it.enter = HERO[i].enter; it.exit = it.enter + HERO[i].dwell; it.land = it.exit + 0.4; });
+        const Q0 = 5.75, QSTEP = 0.2;
+        quick.forEach((it, i) => { it.enter = Q0 + i * QSTEP; it.exit = it.enter + QSTEP - 0.03; it.land = it.exit + 0.25; });
+
+        // ---------- build cards ----------
+        const cardsEl = document.getElementById("cards");
+        const glowsEl = document.getElementById("glows");
+        const mailhead = it => {
+          const h = el("div", "mailhead");
+          h.append(el("span", "avatar", initial(it.from)), el("span", "sender", it.from));
+          const s = el("span", "stamp");
+          s.append(el("span", "jdot"), document.createTextNode(`Jev · ${it.ms} ms`));
+          h.appendChild(s);
+          return h;
+        };
+        heroes.forEach(it => {
+          const c = el("div", "card");
+          c.append(mailhead(it), el("div", "text", it.text));
+          const tags = el("div", "tags");
+          it.tagEls = it.tags.map(tg => { const s = el("span", `tag ${tg.k}`, tg.t.replace(/\s+/g, " ")); tags.appendChild(s); return s; });
+          c.appendChild(tags);
+          const v = el("div", "verdict");
+          const dot = el("span", "vdot"); dot.style.background = COLOR[it.lane];
+          const ln = el("span", "lane-name", LANE_NAMES[it.lane]); ln.style.color = COLOR[it.lane];
+          v.append(dot, ln, el("span", "why", it.reason));
+          c.appendChild(v);
+          it.verdictEl = v;
+          cardsEl.appendChild(c);
+          it.card = c;
+          const g = el("div", "glow");
+          g.style.background = `radial-gradient(closest-side, ${GLOW[it.lane] || "rgba(10,132,255,0.35)"}, transparent 100%)`;
+          glowsEl.appendChild(g);
+          it.glow = g;
+        });
+        quick.forEach(it => {
+          const c = el("div", "qcard");
+          c.setAttribute("data-layout-allow-overlap", "");
+          const body = el("div", "qbody");
+          body.append(el("span", "qfrom", it.from), el("span", "qtext", it.text));
+          const lane = el("span", "qlane", it.ok ? LANE_NAMES[it.lane] : "Unsure");
+          lane.style.color = COLOR[it.lane]; lane.style.background = TINT[it.lane];
+          c.append(el("span", "avatar", initial(it.from)), body, lane);
+          cardsEl.appendChild(c);
+          it.card = c;
+        });
+
+        // Apple-style "thinking" edge glow: only while Jev is judging a card
+        const THINK = "#ff6778, #ffba71, #f5b9ea, #c686ff, #8d99ff, #ff6778";
+        heroes.forEach(it => {
+          const g = el("div", "think");
+          g.style.top = `${it.card.offsetTop - 12}px`;
+          g.style.height = `${it.card.offsetHeight + 24}px`;
+          glowsEl.appendChild(g);
+          it.think = g;
+        });
+
+        items.forEach(it => {
+          const cx = LEFT + 936 / 2;
+          const cy = it.card.offsetTop + it.card.offsetHeight / 2;
+          it.dx = it.tx + TOKEN / 2 - cx;
+          it.dy = it.ty + TOKEN / 2 - cy;
+        });
+
+        // ---------- timeline ----------
+        const tl = gsap.timeline({ paused: true });
+        const SMOOTH = "expo.out";
+
+        tl.fromTo("#eyebrow", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: SMOOTH }, 0);
+        tl.fromTo("#headline", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: SMOOTH }, 0);
+        tl.fromTo("#tiles .tile", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: SMOOTH, stagger: 0.06 }, 0.15);
+
+        heroes.forEach(it => {
+          const T = it.enter;
+          tl.fromTo(it.card, { opacity: 0, y: 90, scale: 0.94, x: 0 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: SMOOTH }, T);
+          it.tagEls.forEach((tg, j) => {
+            tl.fromTo(tg, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.45, ease: SMOOTH }, T + 0.65 + j * 0.18);
+          });
+          const vAt = T + 0.65 + it.tagEls.length * 0.18 + 0.15;
+          it.vAt = vAt;
+          tl.fromTo(it.verdictEl, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: SMOOTH }, vAt);
+          tl.fromTo(it.verdictEl, { scale: 1 }, { scale: 0.97, duration: 0.12, ease: "power1.in", immediateRender: false }, vAt + 0.35);
+          tl.to(it.verdictEl, { scale: 1, duration: 0.6, ease: "power3.out" }, vAt + 0.47);
+          const j0 = T + 0.45, j1 = vAt + 0.35;
+          const spin = { a: 0 };
+          tl.fromTo(spin, { a: 0 }, {
+            a: 300, duration: j1 + 0.5 - j0, ease: "none",
+            onUpdate: () => { it.think.style.background = `conic-gradient(from ${spin.a}deg, ${THINK})`; },
+          }, j0);
+          tl.fromTo(it.think, { opacity: 0 }, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, j0);
+          tl.to(it.think, { opacity: 0, duration: 0.5, ease: "power2.in" }, j1);
+          tl.fromTo(it.glow, { opacity: 0, scale: 0.9 }, { opacity: it.lane === "human_now" ? 0.4 : 0.25, scale: 1, duration: 0.9, ease: "power2.out" }, vAt - 0.3);
+          tl.to(it.glow, { opacity: 0, duration: 0.4, ease: "power1.in" }, it.exit);
+          tl.fromTo(it.card, { x: 0, y: 0, scale: 1, opacity: 1 },
+            { x: it.dx, y: it.dy, scale: 0.08, opacity: 0, duration: 0.5, ease: "power3.inOut", immediateRender: false }, it.exit);
+        });
+
+        quick.forEach(it => {
+          tl.fromTo(it.card, { opacity: 0, scale: 0.94, y: -24, x: 0 }, { opacity: 1, scale: 1, y: 0, duration: 0.16, ease: "power3.out" }, it.enter);
+          tl.fromTo(it.card, { x: 0, y: 0, scale: 1 }, { x: it.dx, y: it.dy, scale: 0.08, duration: 0.3, ease: "power3.out", immediateRender: false }, it.exit);
+          tl.fromTo(it.card, { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.in", immediateRender: false }, it.exit);
+        });
+
+        items.forEach(it => {
+          tl.fromTo(it.token, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, it.land - 0.12);
+        });
+
+        const meter = { p: 0 };
+        tl.to(meter, {
+          p: 1, duration: 10.4, ease: "none",
+          onUpdate: () => {
+            const t = tl.time();
+            LANES.forEach(k => {
+              const landed = items.filter(it => it.lane === k && t >= it.land - 0.1);
+              laneCount[k].textContent = String(landed.length);
+              const last = landed.length ? Math.max(...landed.map(it => it.land - 0.1)) : -9;
+              const k01 = Math.min(1, Math.max(0, (t - last) / 0.35));
+              laneCount[k].style.transform = `scale(${1 + 0.1 * (1 - k01) * (landed.length ? 1 : 0)})`;
+            });
+          },
+        }, 0);
+
+        const T = 10.05;
+        tl.to("#sceneA", { filter: "blur(18px)", scale: 0.96, duration: 0.55, ease: "power1.in" }, T);
+        tl.to("#sceneA", { opacity: 0, duration: 0.3, ease: "power2.in" }, T + 0.25);
+        tl.fromTo("#sceneB", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" }, T + 0.25);
+
+        const C0 = T + 0.4, CD = 1.4, CE = "power3.out";
+        const big = document.getElementById("big-num");
+        const bigP = { v: 0 };
+        tl.fromTo(bigP, { v: 0 }, { v: stats.correct, duration: CD, ease: CE, onUpdate: () => { big.textContent = String(Math.round(bigP.v)); } }, C0);
+        tl.fromTo(big, { scale: 0.6 }, { scale: 1, duration: CD, ease: CE }, C0);
+        tl.fromTo("#big-den", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.6, ease: SMOOTH }, C0 + CD - 0.3);
+        tl.fromTo("#lede", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: SMOOTH }, C0 + 0.3);
+        tl.fromTo("#sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: SMOOTH }, C0 + 0.45);
+        tl.fromTo(".col", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: SMOOTH, stagger: 0.08 }, C0 + 0.55);
+
+        const S0 = C0 + 0.7;
+        const vR = document.getElementById("v-risky"), vM = document.getElementById("v-ms"), vC = document.getElementById("v-cost");
+        const chord = { p: 0 };
+        tl.fromTo(chord, { p: 0 }, {
+          p: 1, duration: CD, ease: CE, immediateRender: false,
+          onUpdate: () => {
+            vR.textContent = String(Math.round(stats.risky_automated * chord.p));
+            vM.textContent = `${Math.round(stats.median_ms * chord.p)} ms`;
+            vC.textContent = `${(stats.monthly_cents * chord.p).toFixed(1)}¢`;
+          },
+        }, S0);
+        tl.fromTo(".col .val", { scale: 0.7 }, { scale: 1, duration: CD, ease: CE }, S0);
+
+        window.__timelines["main"] = tl;
+        if (window.__hfForceTimelineRebind) window.__hfForceTimelineRebind();
+      });
+    </script>
+  </body>
+</html>
