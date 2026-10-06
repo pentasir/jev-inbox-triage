@@ -18,9 +18,11 @@ Model: `jev-1.13.0` from [TypeSafe](https://typesafe.ai). Real output, recorded 
 
 ## Why this exists
 
-Anyone who has answered a small store's inbox knows the particular weariness of it: the same handful of letters arriving all day in no useful order, so that the parent whose child has swallowed some cleanser waits patiently behind an agency promising to triple the brand's sales. Most of those letters never needed the owner at all; a few needed them urgently, and the cost of the inbox lies almost entirely in the time it takes to tell the two apart.
+From my ecom days, I know most store owners spend hours combing through customer emails. Most don't need a human to reply. A few really do.
 
-Jev, a newly released "System One" model from TypeSafe, seemed built for exactly that distinction. It cannot write a sentence and does not try to; it answers narrow questions about a piece of text with typed labels and a measure of how sure it is, and leaves every consequential action to ordinary code that can be read and tested. This repository is the result of asking whether that is enough to keep the right letters in front of the right person.
+I built this to test out Jev, TypeSafe's new decision model. Think of it as a personal assistant that combs through your emails and works out which ones need to be escalated to you, the owner.
+
+What surprised me most was the cost compared to the volume of emails, and the speed. AI customer service still has a long way to go, and people get frustrated dealing with machines. But the smaller enquiries, like finding a tracking number, don't need a human. The owner's time should go to the ones that do.
 
 ## How it works
 
