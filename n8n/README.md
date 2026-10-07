@@ -6,6 +6,8 @@ Labels and alerts only. Nothing is ever sent to a customer. Run it for two weeks
 
 ## Flow
 
+![n8n workflow diagram](../docs/n8n-workflow.png)
+
 ```
 New email (Gmail, every minute)
   → Build Jev request   newest message only, max 3,000 chars, store context

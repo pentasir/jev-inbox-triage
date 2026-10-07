@@ -26,6 +26,8 @@ What surprised me most was the cost compared to the volume of emails, and the sp
 
 ## How it works
 
+![Workflow map: email arrives, Jev answers eight questions, rules pick one of four lanes, every decision is logged](docs/workflow-map.png)
+
 Each email is sent to Jev once, with eight questions answered in parallel:
 
 | Question | Type |
@@ -73,6 +75,8 @@ python3 triage.py --order-check   # live run, then re-ask topic with reversed op
 Standard library only. Put a key from [console.typesafe.ai](https://console.typesafe.ai/keys) in `TYPESAFE_API_KEY` or `~/.typesafe/api_key` (mode 600). The report is written to `results/report.html`.
 
 ## n8n workflow (work in progress)
+
+![n8n workflow: Gmail trigger, Jev request, decide lane or fail safe, route to four Gmail labels, Slack alert for urgent mail, Google Sheet log](docs/n8n-workflow.png)
 
 [`n8n/`](n8n/) holds a shadow-mode workflow for a real Gmail inbox: labels, a Slack alert for urgent mail and a Google Sheet log, with nothing ever sent to a customer. It is generated from `triage.py` and its rules match the Python version on all twenty emails, but it has not yet been run inside a live n8n instance. See [`n8n/README.md`](n8n/README.md).
 
