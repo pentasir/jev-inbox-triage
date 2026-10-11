@@ -3,6 +3,7 @@
 const RISK_AT = 0.3, PITCH_AT = 0.8, LO = 0.3, HI = 0.7, TOPIC_CONF_MIN = 0.6;
 const RISK_NOULS = {"safety_issue": "health or safety", "legal_or_chargeback": "legal or chargeback", "public_complaint": "public complaint"};
 const AUTO_ACTIONS = {"where_is_order": "Auto-reply with live tracking", "damaged_or_wrong": "Auto-reply asking for a photo, priority queue", "refund_return": "Auto-reply with returns form"};
+const TOPICS = ["where_is_order", "damaged_or_wrong", "refund_return", "product_question", "other"];
 
 function decide(a) {
   const topic = a.topic.choice, topicConf = a.topic.confidence;
@@ -22,4 +23,30 @@ function decide(a) {
   return ["human_queue", "Needs a person"];
 }
 
-module.exports = { decide };
+// Ported from triage.py validate(): the first unusable field, or null if decide() can read every answer.
+// Without this, a missing or non-numeric value fails every comparison and can fall through to Automated.
+const isObj = x => x !== null && typeof x === "object" && !Array.isArray(x);
+const realIn = (v, lo, hi) => typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
+
+function validate(a) {
+  if (!isObj(a)) return "no answers";
+  const t = a.topic;
+  if (isObj(t) && t.choice !== null && typeof t.choice === "object") return "malformed answer";
+  if (!isObj(t) || typeof t.choice !== "string" || !TOPICS.includes(t.choice)) return "topic.choice";
+  if (!realIn(t.confidence, 0, 1)) return "topic.confidence";
+  for (const q of ["urgency", "frustration"])
+    if (!isObj(a[q]) || !realIn(a[q].score, 0, 2)) return `${q}.score`;
+  for (const q of [...Object.keys(RISK_NOULS), "refund_requested", "is_pitch"])
+    if (!isObj(a[q]) || !realIn(a[q].noul, 0, 1)) return `${q}.noul`;
+  return null;
+}
+
+// Ported from triage.py decide_safe(): anything missing or unusable goes to a person.
+function decideSafe(a) {
+  if (a === undefined || a === null) return ["human_queue", "Jev unavailable, left for a person"];
+  const field = validate(a);
+  if (field) return ["human_queue", `Invalid answer (${field}), left for a person`];
+  return decide(a);
+}
+
+module.exports = { decide, validate, decideSafe };

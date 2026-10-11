@@ -7,23 +7,28 @@ Usage:
   python3 triage.py --order-check  live run, then re-ask topic with options reversed to test order bias
   python3 triage.py --selftest   render the report from the hand labels (checks the pipeline only,
                                  the report is stamped as NOT model output)
+  python3 triage.py --replay [raw.json]  re-run the rules on saved responses, no API calls
+                                 (default results/raw.json; report goes next to the input file)
+
+Any failure (API error, timeout, bad JSON, missing or out-of-range answer) sends the email
+to the Human queue. Nothing reaches the Automated lane unless every answer is usable.
 """
 
 from __future__ import annotations
 
 import html
 import json
+import math
 import os
 import sys
 import time
-import urllib.error
 import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 RESULTS = ROOT / "results"
 API_URL = os.getenv("TYPESAFE_BASE_URL", "https://api.typesafe.ai").rstrip("/") + "/v1/systemone"
-MODEL = os.getenv("TYPESAFE_MODEL", "jev-latest")
+MODEL = os.getenv("TYPESAFE_MODEL", "jev-1.13.0")  # pinned: the README results were recorded on 1.13.0
 PRICE_PER_MTOK = 0.042  # USD, input only; output is free
 MONTHLY_EMAILS = 600
 
@@ -139,7 +144,8 @@ def reversed_topic_questions() -> dict:
     return {"topic": q["topic"]}
 
 
-def call_jev(email: dict, key: str, questions: dict | None = None) -> tuple[dict, int]:
+def call_jev(email: dict, key: str, questions: dict | None = None) -> tuple[dict | None, int]:
+    """Return (body, latency_ms). Body is None on any failure, so the email goes to a person."""
     req = urllib.request.Request(
         API_URL,
         data=json.dumps(payload_for(email, questions)).encode(),
@@ -150,8 +156,11 @@ def call_jev(email: dict, key: str, questions: dict | None = None) -> tuple[dict
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             body = json.loads(resp.read())
-    except urllib.error.HTTPError as exc:
-        raise SystemExit(f"TypeSafe API {exc.code} on {email['id']}: {exc.read()[:500]!r}")
+        if not isinstance(body, dict):
+            raise ValueError(f"expected a JSON object, got {type(body).__name__}")
+    except (OSError, ValueError) as exc:  # HTTPError, URLError, timeouts, resets, bad JSON
+        print(f"{email['id']}  Jev call failed: {exc!r}", file=sys.stderr)
+        body = None
     return body, round((time.perf_counter() - start) * 1000)
 
 
@@ -190,6 +199,52 @@ def decide(a: dict) -> tuple[str, str]:
     return "human_queue", "Needs a person"
 
 
+def _real_in(v, lo: float, hi: float) -> bool:
+    """True for a finite int or float (not bool) in [lo, hi]."""
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and lo <= v <= hi and math.isfinite(v)
+
+
+def validate(a) -> str | None:
+    """Return the first unusable field, or None if decide() can safely read every answer."""
+    if not isinstance(a, dict):
+        return "no answers"
+    try:
+        topic = a.get("topic")
+        if not isinstance(topic, dict) or topic.get("choice") not in QUESTIONS["topic"]["criteria"]:
+            return "topic.choice"
+        if not _real_in(topic.get("confidence"), 0, 1):
+            return "topic.confidence"
+        for q in ("urgency", "frustration"):
+            if not isinstance(a.get(q), dict) or not _real_in(a[q].get("score"), 0, 2):
+                return f"{q}.score"
+        for q in (*RISK_NOULS, "refund_requested", "is_pitch"):
+            if not isinstance(a.get(q), dict) or not _real_in(a[q].get("noul"), 0, 1):
+                return f"{q}.noul"
+    except (KeyError, TypeError):  # e.g. an unhashable choice
+        return "malformed answer"
+    return None
+
+
+def decide_safe(a) -> tuple[str, str]:
+    """decide(), but a missing or unusable answer goes to the Human queue instead of crashing."""
+    if a is None:
+        return "human_queue", "Jev unavailable, left for a person"
+    field = validate(a)
+    if field:
+        return "human_queue", f"Invalid answer ({field}), left for a person"
+    return decide(a)
+
+
+def answers_of(body) -> dict | None:
+    return body.get("answers") if isinstance(body, dict) else None
+
+
+def valid_topic(a) -> str | None:
+    topic = a.get("topic") if isinstance(a, dict) else None
+    choice = topic.get("choice") if isinstance(topic, dict) else None
+    return choice if isinstance(choice, str) and choice in QUESTIONS["topic"]["criteria"] else None
+
+
 # ---------- self-test answers (pipeline check only) ----------
 
 def fake_answers(exp: dict) -> dict:
@@ -217,7 +272,7 @@ def needs_human(lane: str) -> bool:
     return lane.startswith("human")
 
 
-def build_report(rows: list[dict], selftest: bool, order_flips: int | None) -> str:
+def build_report(rows: list[dict], selftest: bool, order_flips: int | None, note: str = "") -> str:
     n = len(rows)
     lane_ok = sum(r["lane_ok"] for r in rows)
     human_ok = sum(needs_human(r["lane"]) == needs_human(r["exp"]["lane"]) for r in rows)
@@ -227,14 +282,20 @@ def build_report(rows: list[dict], selftest: bool, order_flips: int | None) -> s
     monthly = avg_tok * MONTHLY_EMAILS * PRICE_PER_MTOK / 1e6
     lat = sorted(r["latency_ms"] for r in rows)
     counts = {k: sum(r["lane"] == k for r in rows) for k in LANES}
+    bad = sum(not r["valid"] for r in rows)
 
     def cell(r):
         a = r["answers"]
+        if r["valid"]:
+            topic = f"{a['topic']['choice'].replace('_', ' ')}<span class='c'>{a['topic']['confidence']:.2f}</span>"
+            risk = ", ".join(x.replace("_", " ") for x in risks(a)) or "none"
+        else:
+            topic = risk = "&mdash;"
         return (
             f"<tr class='{'' if r['lane_ok'] else 'miss'}'>"
             f"<td class='msg'>{html.escape(r['text'])}</td>"
-            f"<td>{a['topic']['choice'].replace('_', ' ')}<span class='c'>{a['topic']['confidence']:.2f}</span></td>"
-            f"<td>{', '.join(r.replace('_', ' ') for r in risks(a)) or 'none'}</td>"
+            f"<td>{topic}</td>"
+            f"<td>{risk}</td>"
             f"<td><span class='lane {r['lane']}'>{LANES[r['lane']]}</span><div class='why'>{html.escape(r['reason'])}</div></td>"
             f"<td class='tick'>{'✓' if r['lane_ok'] else '✗ expected ' + LANES[r['exp']['lane']]}</td></tr>"
         )
@@ -243,6 +304,8 @@ def build_report(rows: list[dict], selftest: bool, order_flips: int | None) -> s
         "<div class='banner'>SELF-TEST: built from hand labels to check the pipeline. Not model output.</div>"
         if selftest else ""
     )
+    if note:
+        banner += f"<p class='sub'>{html.escape(note)}</p>"
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>Inbox triage results</title>
 <style>
 body{{font:14px/1.45 -apple-system,system-ui,sans-serif;background:#f6f5f2;color:#1d1d1b;margin:0;padding:32px}}
@@ -268,10 +331,39 @@ td.msg{{width:42%}} .c{{color:#8a8a84;font-size:12px;margin-left:6px}} .why{{col
 <div class="stat"><b>{lat[n // 2]} ms</b><span>median time per email</span></div>
 <div class="stat"><b>${monthly:.3f}</b><span>per month at {MONTHLY_EMAILS} emails (≈{avg_tok:.0f} tokens each)</span></div>
 </div>
-<p class="sub">Human now: {counts['human_now']} · Human queue: {counts['human_queue']} · Automated: {counts['auto']} · Archived: {counts['archive']} · Exact lane match: {lane_ok}/{n}{'' if order_flips is None else f' · Topic changed when options were reversed: {order_flips}/{n}'}</p>
+<p class="sub">Human now: {counts['human_now']} · Human queue: {counts['human_queue']} · Automated: {counts['auto']} · Archived: {counts['archive']} · Exact lane match: {lane_ok}/{n} · Failed or invalid: {bad}{'' if order_flips is None else f' · Topic changed when options were reversed: {order_flips}/{n}'}</p>
 <table><tr><th>Email</th><th>Topic</th><th>Risk</th><th>Lane</th><th></th></tr>
 {''.join(cell(r) for r in rows)}
 </table></div></body></html>"""
+
+
+def make_row(e: dict, body, ms: int) -> dict:
+    """Score one email from a raw Jev response (or None) and print its line."""
+    answers = answers_of(body)
+    lane, reason = decide_safe(answers)
+    row = {
+        "id": e["id"], "text": e["text"], "exp": e["expected"], "answers": answers,
+        "valid": validate(answers) is None,
+        "model": body.get("model", MODEL) if isinstance(body, dict) else MODEL, "lane": lane, "reason": reason,
+        "lane_ok": ok(lane, e["expected"], "lane"),
+        "tokens": body.get("usage", {}).get("input_tokens", 0) if isinstance(body, dict) else 0, "latency_ms": ms,
+    }
+    print(f"{e['id']}  {LANES[lane]:<12} {'ok ' if row['lane_ok'] else 'MISS'}  {reason}")
+    return row
+
+
+def replay(emails: list[dict]) -> None:
+    """Re-run the lane rules on saved responses. No API calls."""
+    i = sys.argv.index("--replay")
+    src = Path(sys.argv[i + 1]) if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith("--") else RESULTS / "raw.json"
+    saved = {s["id"]: s for s in json.loads(src.read_text(encoding="utf-8"))}
+    rows = []
+    for e in emails:
+        s = saved.get(e["id"], {})
+        rows.append(make_row(e, s.get("response"), s.get("latency_ms", 0)))
+    out = src.resolve().parent / "report-replay.html"
+    out.write_text(build_report(rows, False, None, f"Replayed from {src.name}, no API calls."), encoding="utf-8")
+    print(f"\nLane match: {sum(r['lane_ok'] for r in rows)}/{len(rows)}\nReport: {out}")
 
 
 def main() -> None:
@@ -279,6 +371,10 @@ def main() -> None:
 
     if "--dry-run" in sys.argv:
         print(json.dumps(payload_for(emails[0]), indent=2, ensure_ascii=False))
+        return
+
+    if "--replay" in sys.argv:
+        replay(emails)
         return
 
     selftest = "--selftest" in sys.argv
@@ -293,23 +389,20 @@ def main() -> None:
         else:
             body, ms = call_jev(e, key)
         raw.append({"id": e["id"], "latency_ms": ms, "response": body})
-        lane, reason = decide(body["answers"])
-        rows.append({
-            "id": e["id"], "text": e["text"], "exp": e["expected"], "answers": body["answers"],
-            "model": body.get("model", MODEL), "lane": lane, "reason": reason,
-            "lane_ok": ok(lane, e["expected"], "lane"),
-            "tokens": body.get("usage", {}).get("input_tokens", 0), "latency_ms": ms,
-        })
-        print(f"{e['id']}  {LANES[lane]:<12} {'ok ' if rows[-1]['lane_ok'] else 'MISS'}  {reason}")
+        rows.append(make_row(e, body, ms))
 
     order_flips = None
     if "--order-check" in sys.argv and not selftest:
         order_flips = 0
         for e, r in zip(emails, rows):
             body, _ = call_jev(e, key, reversed_topic_questions())
-            if body["answers"]["topic"]["choice"] != r["answers"]["topic"]["choice"]:
+            before, after = valid_topic(r["answers"]), valid_topic(answers_of(body))
+            if before is None or after is None:
+                print(f"{e['id']}  order check skipped, no valid topic")
+                continue
+            if after != before:
                 order_flips += 1
-                print(f"{e['id']}  topic flipped with reversed options: {r['answers']['topic']['choice']} -> {body['answers']['topic']['choice']}")
+                print(f"{e['id']}  topic flipped with reversed options: {before} -> {after}")
 
     suffix = "-selftest" if selftest else ""
     (RESULTS / f"raw{suffix}.json").write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")

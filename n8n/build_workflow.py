@@ -4,7 +4,7 @@ questions, thresholds and lane rules that were tested on the 20 emails.
 
 Writes:
   n8n/jev-inbox-triage-shadow.json   import into n8n
-  n8n/decide.js                      the lane rules on their own (used by the parity test)
+  n8n/decide.js                      the lane rules on their own (used by n8n/parity_test.py)
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ DECIDE_JS = f"""// Lane rules, ported line for line from triage.py decide(). Ord
 const RISK_AT = {triage.RISK_AT}, PITCH_AT = {triage.PITCH_AT}, LO = {LO}, HI = {HI}, TOPIC_CONF_MIN = {triage.TOPIC_CONF_MIN};
 const RISK_NOULS = {json.dumps({q: l.replace("_", " ") for q, l in triage.RISK_NOULS.items()})};
 const AUTO_ACTIONS = {json.dumps(triage.AUTO_ACTIONS)};
+const TOPICS = {json.dumps(list(triage.QUESTIONS["topic"]["criteria"]))};
 
 function decide(a) {{
   const topic = a.topic.choice, topicConf = a.topic.confidence;
@@ -42,6 +43,32 @@ function decide(a) {{
   if (urgency >= 1.5) return ["human_now", "Needs a reply today"];
   if (topic === "product_question") return ["human_queue", "Product question, reply drafted for review"];
   return ["human_queue", "Needs a person"];
+}}
+
+// Ported from triage.py validate(): the first unusable field, or null if decide() can read every answer.
+// Without this, a missing or non-numeric value fails every comparison and can fall through to Automated.
+const isObj = x => x !== null && typeof x === "object" && !Array.isArray(x);
+const realIn = (v, lo, hi) => typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
+
+function validate(a) {{
+  if (!isObj(a)) return "no answers";
+  const t = a.topic;
+  if (isObj(t) && t.choice !== null && typeof t.choice === "object") return "malformed answer";
+  if (!isObj(t) || typeof t.choice !== "string" || !TOPICS.includes(t.choice)) return "topic.choice";
+  if (!realIn(t.confidence, 0, 1)) return "topic.confidence";
+  for (const q of ["urgency", "frustration"])
+    if (!isObj(a[q]) || !realIn(a[q].score, 0, 2)) return `${{q}}.score`;
+  for (const q of [...Object.keys(RISK_NOULS), "refund_requested", "is_pitch"])
+    if (!isObj(a[q]) || !realIn(a[q].noul, 0, 1)) return `${{q}}.noul`;
+  return null;
+}}
+
+// Ported from triage.py decide_safe(): anything missing or unusable goes to a person.
+function decideSafe(a) {{
+  if (a === undefined || a === null) return ["human_queue", "Jev unavailable, left for a person"];
+  const field = validate(a);
+  if (field) return ["human_queue", `Invalid answer (${{field}}), left for a person`];
+  return decide(a);
 }}
 """
 
@@ -69,7 +96,7 @@ return {{
     fromAddress: sender.address || "",
     subject: e.subject || "",
     payload: {{
-      model: "jev-latest",
+      model: {json.dumps(triage.MODEL)}, // pinned: the version the 20-email results were recorded on
       state: {{ store: STORE, email: {{ from: fromName, subject: e.subject || "", text: newest }} }},
       questions: QUESTIONS,
     }},
@@ -80,7 +107,26 @@ return {{
 DECIDE_NODE_JS = DECIDE_JS + """
 const a = $json.answers;
 const src = $('Build Jev request').item.json;
-const [lane, reason] = decide(a);
+let lane, reason, valid;
+try {
+  [lane, reason] = decideSafe(a);
+  valid = validate(a) === null;
+} catch (err) {
+  // Should never happen after validate(), but a crash here would drop the email unlabelled.
+  [lane, reason, valid] = ["human_queue", `Decide step error (${err.message}), left for a person`, false];
+}
+
+const scores = valid ? {
+  topic: a.topic.choice,
+  topic_conf: a.topic.confidence,
+  urgency: a.urgency.score,
+  frustration: a.frustration.score,
+  safety: a.safety_issue.noul,
+  legal_or_chargeback: a.legal_or_chargeback.noul,
+  public_complaint: a.public_complaint.noul,
+  refund: a.refund_requested.noul,
+  pitch: a.is_pitch.noul,
+} : {};
 
 return {
   json: {
@@ -93,22 +139,15 @@ return {
     fromAddress: src.fromAddress,
     subject: src.subject,
     gmailLink: `https://mail.google.com/mail/u/0/#all/${src.threadId}`,
-    topic: a.topic.choice,
-    topic_conf: a.topic.confidence,
-    urgency: a.urgency.score,
-    frustration: a.frustration.score,
-    safety: a.safety_issue.noul,
-    legal_or_chargeback: a.legal_or_chargeback.noul,
-    public_complaint: a.public_complaint.noul,
-    refund: a.refund_requested.noul,
-    pitch: a.is_pitch.noul,
+    ...scores,
     input_tokens: $json.usage?.input_tokens ?? null,
     model: $json.model ?? null,
   },
 };
 """
 
-FAILSAFE_JS = """// Jev call failed (timeout, outage, bad key). Never drop an email: send it to a person.
+FAILSAFE_JS = """// Jev call failed after 3 tries (timeout, outage, bad key). Send the email to a person.
+// Bad answers inside a successful reply are caught by validate() in Decide lane instead.
 const src = $('Build Jev request').item.json;
 return {
   json: {
@@ -247,7 +286,7 @@ def main() -> None:
         "pinData": {},
     }
     (HERE / "jev-inbox-triage-shadow.json").write_text(json.dumps(workflow, indent=2, ensure_ascii=False), encoding="utf-8")
-    (HERE / "decide.js").write_text(DECIDE_JS + "\nmodule.exports = { decide };\n", encoding="utf-8")
+    (HERE / "decide.js").write_text(DECIDE_JS + "\nmodule.exports = { decide, validate, decideSafe };\n", encoding="utf-8")
     print(f"Wrote {len(nodes)} nodes to n8n/jev-inbox-triage-shadow.json and n8n/decide.js")
 
 

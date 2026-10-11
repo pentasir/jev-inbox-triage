@@ -44,6 +44,7 @@ Each email is sent to Jev once, with eight questions answered in parallel:
 Plain rules in [`triage.py`](triage.py) then choose a lane. Safety checks run first, and anything the model is unsure about goes to a person rather than to automation:
 
 ```
+missing or unusable answer      → Human queue
 any risk flag ≥ 0.30            → Human now
 sales pitch ≥ 0.80              → Archived
 customer close to leaving       → Human now
@@ -54,6 +55,16 @@ everything else                 → Human queue
 ```
 
 The thresholds follow TypeSafe's guidance that a threshold should scale with the cost of being wrong: a missed safety issue is expensive, so risk flags trigger early; archiving a real customer is expensive, so a pitch must be clear before it is archived.
+
+## When something goes wrong
+
+If Jev times out, returns an error or sends back an answer the rules can't trust, the email goes to the Human queue instead of automation.
+
+Before the rules run, `validate()` checks every answer. The topic must be one of the five options. Topic confidence and the five yes/no scores must be numbers from 0 to 1, and urgency and frustration from 0 to 2. A missing field, a number sent as text or an out-of-range value sends the email to a person, and the reason is logged, for example `Invalid answer (topic.confidence)`.
+
+I tested this by corrupting saved responses and by pointing the script at an address that doesn't answer. Every affected email landed in the Human queue and the run finished.
+
+The model is pinned to `jev-1.13.0`, so a new Jev release can't change the results without me noticing. `--replay` re-runs the rules on the saved responses with no API calls, which lets me check a rule change against the recorded run before trusting it.
 
 ## What it got wrong, and nearly wrong
 
@@ -70,6 +81,7 @@ python3 triage.py --dry-run       # print the request for one email, no API call
 python3 triage.py --selftest      # check the pipeline using hand labels (report is stamped as not model output)
 python3 triage.py                 # live run; needs a TypeSafe key
 python3 triage.py --order-check   # live run, then re-ask topic with reversed options
+python3 triage.py --replay        # re-run the rules on results/raw.json, no API calls
 ```
 
 Standard library only. Put a key from [console.typesafe.ai](https://console.typesafe.ai/keys) in `TYPESAFE_API_KEY` or `~/.typesafe/api_key` (mode 600). The report is written to `results/report.html`.
@@ -78,7 +90,7 @@ Standard library only. Put a key from [console.typesafe.ai](https://console.type
 
 ![n8n workflow: Gmail trigger, Jev request, decide lane or fail safe, route to four Gmail labels, Slack alert for urgent mail, Google Sheet log](docs/n8n-workflow.png)
 
-[`n8n/`](n8n/) holds a shadow-mode workflow for a real Gmail inbox: labels, a Slack alert for urgent mail and a Google Sheet log, with nothing ever sent to a customer. It is generated from `triage.py` and its rules match the Python version on all twenty emails, but it has not yet been run inside a live n8n instance. See [`n8n/README.md`](n8n/README.md).
+[`n8n/`](n8n/) holds a shadow-mode workflow for a real Gmail inbox: labels, a Slack alert for urgent mail and a Google Sheet log, with nothing ever sent to a customer. The workflow is generated from `triage.py`, fail-safe checks included. `n8n/parity_test.py` checks that it gives the same lane and reason as the Python version on all twenty emails and on 21 broken answers. It has not yet been run inside a live n8n instance. See [`n8n/README.md`](n8n/README.md).
 
 ## The video
 
